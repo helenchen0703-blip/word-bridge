@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="r2s2wWxLVozY1l34lkMb7r">
+<head data-page-node-id="I3fW1AGJXls210zuB5t5CH">
+<meta charset="UTF-8" data-page-node-id="fqPm5FBxZJhc9oof0jlhBH">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="lUSRiNaZgyeUQfTeIKAO1e">
+<title>Ava 的复习词卡 · Class Words Review</title>
+<style>
+  :root{
+    --bg:#fdf6ec; --card:#ffffff; --ink:#2b2b3a; --muted:#7a7a8c;
+    --c-group:#2f9e6e; --c-feel:#e2703a; --c-quality:#7c5cbf; --c-chunk:#1c7f8c;
+    --accent:#ffb020; --shadow:0 10px 30px rgba(43,43,58,.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--ink); min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;
+    background-image:radial-gradient(#f3e6cf 1.2px, transparent 1.2px);
+    background-size:26px 26px;
+  }
+  header{width:100%; max-width:760px; padding:26px 20px 6px; text-align:center;}
+  header h1{font-size:26px; letter-spacing:.5px;}
+  header h1 .emoji{margin-right:6px;}
+  header p.sub{margin-top:6px; color:var(--muted); font-size:14px;}
+  .toolbar{display:flex; gap:10px; justify-content:center; margin-top:14px; flex-wrap:wrap;}
+  .pill{
+    border:none; cursor:pointer; font-size:14px; padding:9px 18px; border-radius:999px;
+    background:#fff; color:var(--muted); box-shadow:0 2px 8px rgba(43,43,58,.10);
+    transition:all .15s ease; font-family:inherit;
+  }
+  .pill.active{background:var(--ink); color:#fff;}
+  .pill:hover{transform:translateY(-1px);}
+  .stage{flex:1; width:100%; max-width:760px; display:flex; flex-direction:column; align-items:center; padding:18px 20px 30px;}
+  .counter{color:var(--muted); font-size:14px; margin-bottom:12px;}
+  .cardzone{width:100%; max-width:560px; perspective:1400px;}
+  .card{position:relative; width:100%; height:340px; cursor:pointer;}
+  .card-inner{
+    position:absolute; inset:0; transition:transform .55s cubic-bezier(.4,.1,.2,1);
+    transform-style:preserve-3d;
+  }
+  .card.flipped .card-inner{transform:rotateY(180deg);}
+  .face{
+    position:absolute; inset:0; backface-visibility:-webkit-cardface; -webkit-backface-visibility:hidden;
+    backface-visibility:hidden; background:var(--card); border-radius:26px; box-shadow:var(--shadow);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px 34px; text-align:center;
+  }
+  .face.back{transform:rotateY(180deg); justify-content:flex-start;}
+  .chip{
+    position:absolute; top:20px; left:22px; font-size:12px; color:#fff; padding:4px 12px;
+    border-radius:999px; font-weight:600;
+  }
+  .chip.group{background:var(--c-group);} .chip.feel{background:var(--c-feel);}
+  .chip.quality{background:var(--c-quality);} .chip.chunk{background:var(--c-chunk);}
+  .speaker{
+    position:absolute; top:16px; right:18px; border:none; background:#fff3d9; width:42px; height:42px;
+    border-radius:50%; font-size:19px; cursor:pointer; box-shadow:0 2px 6px rgba(43,43,58,.12);
+  }
+  .speaker:hover{background:#ffe9b8;}
+  .word{font-size:58px; font-weight:800; letter-spacing:1px; line-height:1.1;}
+  .syl{font-size:20px; color:var(--muted); margin-top:10px; letter-spacing:3px;}
+  .pos{display:inline-block; margin-top:14px; font-size:13px; background:#f2ede2; color:#6a6a7a; padding:3px 12px; border-radius:999px;}
+  .hint{margin-top:auto; padding-top:14px; font-size:13px; color:var(--muted);}
+  .back h3{font-size:30px; margin:26px 0 4px;}
+  .back .mini-syl{font-size:14px; color:var(--muted); letter-spacing:2px;}
+  .meaning{
+    background:#fbf3e2; border-radius:16px; padding:12px 16px; width:100%; margin-top:16px;
+    font-size:16px; line-height:1.55; text-align:left;
+  }
+  .meaning b{color:#a05c10;}
+  .sent{
+    margin-top:12px; width:100%; font-size:15px; line-height:1.6; text-align:left; color:#4a4a5c;
+  }
+  .sent .hl{background:#ffe9a8; border-radius:5px; padding:0 4px; font-weight:700;}
+  .tip{margin-top:12px; width:100%; font-size:14px; line-height:1.55; text-align:left; color:var(--muted);}
+  .controls{display:flex; gap:12px; margin-top:20px; align-items:center; flex-wrap:wrap; justify-content:center;}
+  .btn{
+    border:none; cursor:pointer; font-family:inherit; font-size:16px; padding:12px 22px; border-radius:16px;
+    background:#fff; color:var(--ink); box-shadow:0 3px 10px rgba(43,43,58,.12); transition:all .15s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn.primary{background:var(--accent); color:#5c3d00; font-weight:700;}
+  .btn.ok{background:var(--c-group); color:#fff; font-weight:700;}
+  .btn.again{background:#f2ede2; color:#8a5a1a; font-weight:700;}
+  .quizmark{display:none; gap:12px; margin-top:16px; flex-wrap:wrap; justify-content:center;}
+  body.quiz .quizmark.on{display:flex;}
+  .dots{display:flex; gap:8px; margin-top:24px; flex-wrap:wrap; justify-content:center; max-width:620px;}
+  .dot{width:13px; height:13px; border-radius:50%; background:#e7ddc9; transition:all .2s;}
+  .dot.now{outline:3px solid var(--accent); outline-offset:2px;}
+  .dot.ok{background:var(--c-group);}
+  .dot.again{background:#f0a04b;}
+  .keys{margin-top:16px; font-size:12px; color:var(--muted); text-align:center; line-height:1.8;}
+  .overlay{
+    position:fixed; inset:0; background:rgba(43,43,58,.45); display:none; align-items:center;
+    justify-content:center; padding:20px; z-index:10;
+  }
+  .overlay.show{display:flex;}
+  .panel{background:#fff; border-radius:24px; padding:30px 34px; max-width:480px; width:100%; box-shadow:var(--shadow);}
+  .panel h2{font-size:22px; text-align:center;}
+  .panel .sec{margin-top:18px;}
+  .panel .sec h4{font-size:14px; color:var(--muted); margin-bottom:8px;}
+  .wordlist{display:flex; flex-wrap:wrap; gap:8px;}
+  .wtag{background:#eef7f1; color:#1d6b47; border-radius:10px; padding:6px 12px; font-size:14px; font-weight:600;}
+  .wtag.need{background:#fdf0e2; color:#a05c10;}
+  .panel .row{display:flex; gap:10px; margin-top:24px; justify-content:center; flex-wrap:wrap;}
+  #printzone{display:none;}
+  @media print{
+    body{background:#fff; display:block;}
+    header, .toolbar, .stage, .overlay, .keys{display:none !important;}
+    #printzone{display:block; padding:10px;}
+    #printzone h2{font-size:20px; margin-bottom:12px;}
+    .pgrid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+    .pcard{border:2px solid #ddd; border-radius:14px; padding:14px 16px; page-break-inside:avoid;}
+    .pcard .pw{font-size:22px; font-weight:800;}
+    .pcard .pm{font-size:13px; color:#555; margin-top:6px; line-height:1.5;}
+    .pcard .ps{font-size:12px; color:#777; margin-top:6px; font-style:italic;}
+    .pcard .cname{font-size:11px; color:#999;}
+  }
+  @media (max-width:520px){
+    .word{font-size:44px;} .card{height:360px;}
+  }
+</style>
+</head>
+<body data-page-node-id="PphWZq68DpEMnfylkNkWw1">
+<header data-page-node-id="OtU2UJa79heuOS1LKXa3wv">
+  <h1 data-page-node-id="fSumOeyKIstfPF1T5syBYX"><span class="emoji" data-page-node-id="JnJkJ0BJeu7DveVhdld7cJ">📚</span>Ava 的复习词卡</h1>
+  <p class="sub" data-page-node-id="46Lf1Ali0GaKd5teYhtKOW">Class Words Review · 共 11 张 · 点击卡片翻面</p>
+  <div class="toolbar" data-page-node-id="GFcq3tyoCq5zIdjU0amkZ3">
+    <button class="pill active" id="modeStudy" data-page-node-id="zn25DInYQj4xagAA1Rj5DE">📖 学习模式</button>
+    <button class="pill" id="modeQuiz" data-page-node-id="1vJd35PmUnaWgyD1KxCgwA">🎯 测验模式</button>
+    <button class="pill" id="printAll" data-page-node-id="Aj4b5rC6ym8KswVjyxoQ8l">🖨️ 打印词卡</button>
+  </div>
+</header>
+<div class="stage" data-page-node-id="HTQuLVYWb2SKBOMqN3RIFH">
+  <div class="counter" id="counter" data-page-node-id="B8LfwsU7QvGgkxuwhAbAw5">1 / 11</div>
+  <div class="cardzone" data-page-node-id="cI7VFHkPr2lUhjp8kWP7kW">
+    <div class="card" id="card" data-page-node-id="GuTfMZ67pYzcYH5zgO28Da">
+      <div class="card-inner" data-page-node-id="GTykjvVSUCdVvHdAgvKrxB">
+        <div class="face front" data-page-node-id="VdBx9mpz83l5hldhp608SV">
+          <span class="chip group" id="chip" data-page-node-id="7rSjpMS2kirApJoSKFrSZB">同伴与群体</span>
+          <button class="speaker" id="speakBtn" title="朗读单词" data-page-node-id="TseL25gnQS9F3Z6zmZhsFJ">🔊</button>
+          <div class="word" id="word" data-page-node-id="2hyEmxavmgHGrsOrA8pike">companion</div>
+          <div class="syl" id="syl" data-page-node-id="cADEJtgYp8qY1jcjvu7K8P">com · pan · ion</div>
+          <span class="pos" id="pos" data-page-node-id="ly6wfxZlXpDWbB82jBuldt">n. 名词</span>
+          <div class="hint" data-page-node-id="Lwtfrlyfv0P2bR8wjuW6mt">👆 点击卡片看意思</div>
+        </div>
+        <div class="face back" data-page-node-id="a604dGSEvXawUlc6fNlw6Z">
+          <span class="chip group" id="chipBack" data-page-node-id="HDeysAABADbHgbRDq2qIRF">同伴与群体</span>
+          <h3 id="wordBack" data-page-node-id="EGFBiqR4Ue8FqtFrutaWnJ">companion</h3>
+          <div class="mini-syl" id="sylBack" data-page-node-id="5fNxccn0CX3nzihrlTNCBN">com · pan · ion</div>
+          <div class="meaning" id="meaning" data-page-node-id="IujuBUEusH8PVutGQni0Fo"></div>
+          <div class="sent" id="sentence" data-page-node-id="lY9AhlzQ7gNTyZDah0Heuj"></div>
+          <div class="tip" id="tip" data-page-node-id="RBoMlWKbvSCQRmfyCN0zSE"></div>
+        </div>
+      </div>
+    </div>
+    <div class="quizmark" id="quizMark" data-page-node-id="tigpHGn2E8hnTCZRjUi022">
+      <button class="btn ok" id="btnKnow" data-page-node-id="gg6e9dVOYSApYgkDvaGK4G">✅ 我记住了</button>
+      <button class="btn again" id="btnAgain" data-page-node-id="XrAXIOwA13b8sIBDWeyXNV">🔁 还要再练</button>
+    </div>
+  </div>
+  <div class="controls" data-page-node-id="lM4G9kfyxPs74P4XEd6ebI">
+    <button class="btn" id="prevBtn" data-page-node-id="7AIBvp4Bok8fYLtdRlgDIb">← 上一张</button>
+    <button class="btn primary" id="flipBtn" data-page-node-id="d3Y3hgCdK0urGRz5dSjWMD">翻面</button>
+    <button class="btn" id="nextBtn" data-page-node-id="EXCOJhJdlI1yIWMsLmzW8A">下一张 →</button>
+  </div>
+  <div class="dots" id="dots" data-page-node-id="ivotf0FxXDIBxBJKSEwo5g"></div>
+  <div class="keys" data-page-node-id="VTbf5aXxnYbP0FZDXaRckK">键盘：← → 换卡片 · 空格 翻面 · 测验模式中 翻面后点「记住了 / 再练」</div>
+</div>
+
+<div class="overlay" id="overlay" data-page-node-id="s0tG1xMRAm3p0V3x739DAQ">
+  <div class="panel" data-page-node-id="vDIDIHtl0CFGaC9tAGxcUG">
+    <h2 id="ovTitle" data-page-node-id="ODaZ67OtW1psikDHfQwmlF">🎉 这一轮完成啦！</h2>
+    <div class="sec" data-page-node-id="H10UmO45pNuqh2pWzSSnqb">
+      <h4 data-page-node-id="MGFfNA7hrZwOeCVjlCWzKu">✅ 已经记住 <span id="okCount" data-page-node-id="ZvItNrZQoHTPnXHvo1E1eU">0</span> 个</h4>
+      <div class="wordlist" id="okList" data-page-node-id="UJy5hxOX5jAe8TIEGf0d8u"></div>
+    </div>
+    <div class="sec" id="againSec" data-page-node-id="U4jcSloNAYd8nIfQ1pThae">
+      <h4 data-page-node-id="LEXEmUmUIg0fi2CnGzRODK">🔁 还要再练 <span id="againCount" data-page-node-id="2xwYSIzS9HebIFFvuhsx6K">0</span> 个</h4>
+      <div class="wordlist" id="againList" data-page-node-id="JuEjTHERr5O1cUruu8cgHs"></div>
+    </div>
+    <div class="row" data-page-node-id="x7f9O5TRTACLnynzXjH9ih">
+      <button class="btn primary" id="btnDrillAgain" data-page-node-id="CUCwWPYMjXt066Myb1afRR">🔁 只练没记住的</button>
+      <button class="btn" id="btnRestart" data-page-node-id="1NZOkwwB8rCJUOmG87IPEg">↺ 重新开始</button>
+    </div>
+  </div>
+</div>
+
+<div id="printzone" data-page-node-id="Gcc1ZoGeifvvmqbFwzZxzw">
+  <h2 data-page-node-id="137zUbEyQ0vJFUr9enUQB6">Ava 的复习词卡 · Class Words Review</h2>
+  <div class="pgrid" id="pgrid" data-page-node-id="8miZRHGmZZngLhSXetEzPI"></div>
+</div>
+<script>
+var CARDS = [
+  {word:"companion", syl:"com · pan · ion", pos:"n. 名词", cluster:"group", clusterName:"同伴与群体",
+   en:"a friend who stays with you", zh:"同伴；伙伴",
+   sent:"The lion found a true <span class='hl'>companion</span> in the little mouse.",
+   tip:"💡 companion 和 company 是「一家人」——有人陪着你，就是你的 companion。"},
+  {word:"pack", syl:"pack", pos:"n. 名词", cluster:"group", clusterName:"同伴与群体",
+   en:"a group of wild animals like wolves or dogs", zh:"一群（野兽、狗）",
+   sent:"A <span class='hl'>pack</span> of wolves lives in the dark forest.",
+   tip:"💡 「背包」也叫 pack——一群动物「挤」在一起，像塞满的背包。"},
+  {word:"flock", syl:"flock", pos:"n. 名词", cluster:"group", clusterName:"同伴与群体",
+   en:"a group of birds (or sheep)", zh:"一群（鸟、羊）",
+   sent:"A <span class='hl'>flock</span> of birds flew over the field.",
+   tip:"💡 flock 的 f 像小鸟拍翅膀：fl-ock, fl-ock，呼啦啦飞起来。"},
+  {word:"herds", syl:"herds", pos:"n. 名词（复数）", cluster:"group", clusterName:"同伴与群体",
+   en:"big groups of big animals, like cows or elephants", zh:"兽群；牧群",
+   sent:"<span class='hl'>Herds</span> of elephants walked across the grassland.",
+   tip:"💡 herd 是一大群「大块头」动物；herds 是「一大群又一大群」。"},
+  {word:"punished", syl:"pun · ished", pos:"v. 动词（过去式）", cluster:"feel", clusterName:"心情与请求",
+   en:"got in trouble for doing something wrong", zh:"惩罚；受罚",
+   sent:"The lion was <span class='hl'>punished</span> for his rudeness.",
+   tip:"💡 punish（惩罚）+ ed = 过去「被罚了一顿」。"},
+  {word:"pleaded", syl:"plead · ed", pos:"v. 动词（过去式）", cluster:"feel", clusterName:"心情与请求",
+   en:"asked in a sad, begging way", zh:"恳求；央求",
+   sent:"The mouse <span class='hl'>pleaded</span>, \"Please don't eat me!\"",
+   tip:"💡 please, please！央求人时就是说 \"Please…\"——plead 的发音很像 please 的「恳求版」。"},
+  {word:"dearest", syl:"dear · est", pos:"adj. 形容词", cluster:"feel", clusterName:"心情与请求",
+   en:"the one you love most", zh:"最亲爱的",
+   sent:"\"My <span class='hl'>dearest</span> friend,\" said the little mouse.",
+   tip:"💡 dear（亲爱的）+ est（最）= 心里排第一的那个人。"},
+  {word:"courage", syl:"cour · age", pos:"n. 名词", cluster:"quality", clusterName:"美好品质",
+   en:"being brave even when you are scared", zh:"勇气",
+   sent:"Even the smallest mouse can have great <span class='hl'>courage</span>.",
+   tip:"💡 courage 中间藏着 cour（心）——勇气是从心里长出来的。"},
+  {word:"wisdom", syl:"wis · dom", pos:"n. 名词", cluster:"quality", clusterName:"美好品质",
+   en:"knowing what is right and making smart choices", zh:"智慧",
+   sent:"The old owl is full of <span class='hl'>wisdom</span>.",
+   tip:"💡 wise（聪明的）+ dom = 一个人身上的「聪明劲儿」。"},
+  {word:"wit", syl:"wit", pos:"n. 名词", cluster:"quality", clusterName:"美好品质",
+   en:"quick, clever thinking", zh:"机敏；急智",
+   sent:"The little mouse used his <span class='hl'>wit</span> to set the lion free.",
+   tip:"💡 危急时刻「脑筋一转」——又快又机灵，就是 wit。"},
+  {word:"more than", syl:"more · than", pos:"关键词组", cluster:"chunk", clusterName:"关键词组",
+   en:"over a number; not just — more than 是「整包」意思：超过 / 不只是", zh:"超过；不只是",
+   sent:"The king was <span class='hl'>more than</span> angry — he was furious!",
+   tip:"💡 记整包，不拆开：more than angry = 不只是生气（气炸了）。"}
+];
+var idx = 0, flipped = false, marks = [], mode = "study", deck = [];
+
+function initDeck(){ deck = CARDS.slice(); marks = []; }
+initDeck();
+
+var $ = function(id){ return document.getElementById(id); };
+var cardEl = $("card"), chipEl = $("chip"), chipBack = $("chipBack");
+
+function render(){
+  var c = deck[idx];
+  $("counter").textContent = (idx+1) + " / " + deck.length;
+  $("word").textContent = c.word;
+  $("syl").textContent = c.syl;
+  $("pos").textContent = c.pos;
+  $("wordBack").textContent = c.word;
+  $("sylBack").textContent = c.syl;
+  $("meaning").innerHTML = "🇬🇧 " + c.en + "<br><b>🇨🇳 " + c.zh + "</b>";
+  $("sentence").innerHTML = "📖 " + c.sent;
+  $("tip").textContent = c.tip;
+  chipEl.textContent = c.clusterName; chipEl.className = "chip " + c.cluster;
+  chipBack.textContent = c.clusterName; chipBack.className = "chip " + c.cluster;
+  if(flipped){ cardEl.classList.add("flipped"); } else { cardEl.classList.remove("flipped"); }
+  renderDots(); renderQuizMark();
+}
+function renderDots(){
+  var html = "";
+  for(var i=0;i<deck.length;i++){
+    var cls = "dot";
+    if(marks[i]==="ok") cls += " ok";
+    else if(marks[i]==="again") cls += " again";
+    if(i===idx) cls += " now";
+    html += "<span class='" + cls + "'></span>";
+  }
+  $("dots").innerHTML = html;
+}
+function renderQuizMark(){
+  var on = (mode==="quiz" && flipped);
+  $("quizMark").className = "quizmark" + (on ? " on" : "");
+}
+function flip(){ flipped = !flipped; render(); }
+function go(d){ idx = (idx + d + deck.length) % deck.length; flipped = false; render(); }
+function jump(i){ idx = i; flipped = false; render(); }
+
+function speak(){
+  try{
+    var u = new SpeechSynthesisUtterance(deck[idx].word);
+    u.lang = "en-US"; u.rate = 0.8;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+$("flipBtn").onclick = function(e){ e.stopPropagation(); flip(); };
+cardEl.onclick = flip;
+$("speakBtn").onclick = function(e){ e.stopPropagation(); speak(); };
+$("prevBtn").onclick = function(){ go(-1); };
+$("nextBtn").onclick = function(){ go(1); };
+
+$("btnKnow").onclick = function(e){
+  e.stopPropagation(); marks[idx] = "ok";
+  if(idx < deck.length-1){ go(1); } else { showSummary(); }
+};
+$("btnAgain").onclick = function(e){
+  e.stopPropagation(); marks[idx] = "again";
+  if(idx < deck.length-1){ go(1); } else { showSummary(); }
+};
+
+function showSummary(){
+  var ok=[], again=[];
+  deck.forEach(function(c,i){ (marks[i]==="again" ? again : ok).push(c.word); });
+  $("okCount").textContent = ok.length;
+  $("againCount").textContent = again.length;
+  $("okList").innerHTML = ok.map(function(w){ return "<span class='wtag'>"+w+"</span>"; }).join("");
+  $("againList").innerHTML = again.map(function(w){ return "<span class='wtag need'>"+w+"</span>"; }).join("");
+  $("ovTitle").textContent = again.length === 0 ? "🎉 全都会了，太棒了！" : "👍 完成一轮！";
+  $("overlay").classList.add("show");
+}
+$("btnRestart").onclick = function(){
+  $("overlay").classList.remove("show");
+  mode = "quiz"; setMode("quiz"); initDeck(); jump(0);
+};
+$("btnDrillAgain").onclick = function(){
+  var needIdx = [];
+  deck.forEach(function(c,i){ if(marks[i]==="again") needIdx.push(i); });
+  var need = needIdx.map(function(i){ return deck[i]; });
+  if(need.length === 0){ return; }
+  $("overlay").classList.remove("show");
+  var oldMarks = need.map(function(){ return "again"; });
+  deck = need; marks = oldMarks; jump(0);
+};
+
+function setMode(m){
+  mode = m;
+  $("modeStudy").classList.toggle("active", m==="study");
+  $("modeQuiz").classList.toggle("active", m==="quiz");
+  document.body.classList.toggle("quiz", m==="quiz");
+}
+$("modeStudy").onclick = function(){ setMode("study"); };
+$("modeQuiz").onclick = function(){
+  setMode("quiz");
+  if(marks.length !== deck.length){ initDeck(); }
+  jump(0);
+};
+
+$("printAll").onclick = function(){ window.print(); };
+(function buildPrint(){
+  var clusterNames = {group:"同伴与群体", feel:"心情与请求", quality:"美好品质", chunk:"关键词组"};
+  $("pgrid").innerHTML = CARDS.map(function(c){
+    return "<div class='pcard'><div class='pw'>" + c.word +
+      " <span class='cname'>" + clusterNames[c.cluster] + "</span></div>" +
+      "<div class='pm'>" + c.en + " — " + c.zh + "</div>" +
+      "<div class='ps'>" + c.sent.replace(/<[^>]+>/g,"") + "</div></div>";
+  }).join("");
+})();
+
+document.addEventListener("keydown", function(e){
+  if(e.key==="ArrowRight"){ go(1); }
+  else if(e.key==="ArrowLeft"){ go(-1); }
+  else if(e.key===" "){ e.preventDefault(); flip(); }
+});
+render();
+</script>
+</body>
+</html>
