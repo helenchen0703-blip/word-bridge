@@ -71,6 +71,7 @@
   .sent{
     margin-top:12px; width:100%; font-size:15px; line-height:1.6; text-align:left; color:#4a4a5c;
   }
+  .sayS{border:none;background:#fff3cf;border-radius:8px;padding:1px 7px;font-size:15px;cursor:pointer;vertical-align:1px;margin-left:4px;}
   .sent .hl{background:#ffe9a8; border-radius:5px; padding:0 4px; font-weight:700;}
   .tip{margin-top:12px; width:100%; font-size:14px; line-height:1.55; text-align:left; color:var(--muted);}
   .controls{display:flex; gap:12px; margin-top:20px; align-items:center; flex-wrap:wrap; justify-content:center;}
@@ -274,7 +275,7 @@ function render(){
   $("wordBack").textContent = c.word;
   $("sylBack").textContent = c.syl;
   $("meaning").innerHTML = "🇬🇧 " + c.en + "<br><b>🇨🇳 " + c.zh + "</b>";
-  $("sentence").innerHTML = "📖 " + c.sent;
+  $("sentence").innerHTML = "📖 " + c.sent + " <button class='sayS' title='朗读例句' aria-label='朗读例句'>🔊</button>";
   $("tip").textContent = c.tip;
   chipEl.textContent = c.clusterName; chipEl.className = "chip " + c.cluster;
   chipBack.textContent = c.clusterName; chipBack.className = "chip " + c.cluster;
@@ -300,18 +301,45 @@ function flip(){ flipped = !flipped; render(); }
 function go(d){ idx = (idx + d + deck.length) % deck.length; flipped = false; render(); }
 function jump(i){ idx = i; flipped = false; render(); }
 
-function speak(){
+/* pick a real English voice so the browser never reads English with a Chinese voice */
+var VOICE = null, voiceWarned = false;
+function pickVoice(){
   try{
-    var u = new SpeechSynthesisUtterance(deck[idx].word);
-    u.lang = "en-US"; u.rate = 0.8;
+    var vs = window.speechSynthesis.getVoices() || [];
+    var en = vs.filter(function(v){ return /^en[-_]/i.test(v.lang); });
+    var us = en.filter(function(v){ return /^en[-_]US/i.test(v.lang); });
+    var good = /(Premium|Enhanced|Natural|Neural)/i;
+    var names = ["Samantha","Google US English","Microsoft Aria","Microsoft Jenny","Microsoft Zira","Allison","Susan","Karen","Daniel","Google UK English Female"];
+    var byName = function(list){ for(var i=0;i<names.length;i++){ for(var j=0;j<list.length;j++){ if(list[j].name.indexOf(names[i])===0) return list[j]; } } return null; };
+    VOICE = us.filter(function(v){ return good.test(v.name); })[0] || byName(us) || byName(en)
+         || us.filter(function(v){ return v.localService; })[0] || us[0] || en[0] || null;
+  }catch(e){ VOICE = null; }
+}
+try{ pickVoice(); window.speechSynthesis.onvoiceschanged = pickVoice; }catch(e){}
+function say(text){
+  try{
+    if(!VOICE) pickVoice();
+    if(!VOICE && !voiceWarned){
+      voiceWarned = true;
+      alert("这台设备上没有找到英文语音。\niPad / iPhone：设置 → 辅助功能 → 朗读内容 → 声音 → 英语，下载一个声音（如 Samantha）。\nMac：系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音，下载英语声音。");
+    }
+    var u = new SpeechSynthesisUtterance(text);
+    if(VOICE){ u.voice = VOICE; u.lang = VOICE.lang; } else { u.lang = "en-US"; }
+    u.rate = 0.85; u.pitch = 1;
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
   }catch(e){}
+}
+function speak(){ say(deck[idx].word); }
+function speakSentence(){
+  var tmp = document.createElement("div"); tmp.innerHTML = deck[idx].sent;
+  say(tmp.textContent || "");
 }
 
 $("flipBtn").onclick = function(e){ e.stopPropagation(); flip(); };
 cardEl.onclick = flip;
 $("speakBtn").onclick = function(e){ e.stopPropagation(); speak(); };
+$("sentence").onclick = function(e){ if(e.target.className === "sayS"){ e.stopPropagation(); speakSentence(); } };
 $("prevBtn").onclick = function(){ go(-1); };
 $("nextBtn").onclick = function(){ go(1); };
 
