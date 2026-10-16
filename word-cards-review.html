@@ -52,6 +52,7 @@
   .chip.group{background:var(--c-group);} .chip.feel{background:var(--c-feel);}
   .chip.quality{background:var(--c-quality);} .chip.chunk{background:var(--c-chunk);}
   .chip.story{background:#8E6BD8;}
+  .chip.math{background:#2E9C84;}
   .speaker{
     position:absolute; top:16px; right:18px; border:none; background:#fff3d9; width:42px; height:42px;
     border-radius:50%; font-size:19px; cursor:pointer; box-shadow:0 2px 6px rgba(43,43,58,.12);
@@ -125,7 +126,7 @@
 <body data-page-node-id="PphWZq68DpEMnfylkNkWw1">
 <header data-page-node-id="OtU2UJa79heuOS1LKXa3wv">
   <h1 data-page-node-id="fSumOeyKIstfPF1T5syBYX"><span class="emoji" data-page-node-id="JnJkJ0BJeu7DveVhdld7cJ">📚</span>我的复习词卡</h1>
-  <p class="sub" data-page-node-id="46Lf1Ali0GaKd5teYhtKOW">Class Words Review · 共 16 张 · 点击卡片翻面</p>
+  <p class="sub" data-page-node-id="46Lf1Ali0GaKd5teYhtKOW">Class Words Review · 共 18 张 · 点击卡片翻面</p>
   <div class="toolbar" data-page-node-id="GFcq3tyoCq5zIdjU0amkZ3">
     <button class="pill active" id="modeStudy" data-page-node-id="zn25DInYQj4xagAA1Rj5DE">📖 学习模式</button>
     <button class="pill" id="modeQuiz" data-page-node-id="1vJd35PmUnaWgyD1KxCgwA">🎯 测验模式</button>
@@ -133,7 +134,7 @@
   </div>
 </header>
 <div class="stage" data-page-node-id="HTQuLVYWb2SKBOMqN3RIFH">
-  <div class="counter" id="counter" data-page-node-id="B8LfwsU7QvGgkxuwhAbAw5">1 / 16</div>
+  <div class="counter" id="counter" data-page-node-id="B8LfwsU7QvGgkxuwhAbAw5">1 / 18</div>
   <div class="cardzone" data-page-node-id="cI7VFHkPr2lUhjp8kWP7kW">
     <div class="card" id="card" data-page-node-id="GuTfMZ67pYzcYH5zgO28Da">
       <div class="card-inner" data-page-node-id="GTykjvVSUCdVvHdAgvKrxB">
@@ -256,7 +257,15 @@ var CARDS = [
   {word:"sealed", syl:"sealed", pos:"v. / adj.（过去分词）", cluster:"story", clusterName:"神话故事词 · 10/14",
    en:"closed tightly; (fate) decided and cannot change", zh:"封住了；（命运）注定了",
    sent:"The magic door was <span class='hl'>sealed</span>. Nobody could open it.",
-   tip:"💡 两个意思：门被 sealed = 封住了；fate is sealed = 命运注定了。"}
+   tip:"💡 两个意思：门被 sealed = 封住了；fate is sealed = 命运注定了。"},
+  {word:"cost", syl:"cost", pos:"v. / n.", cluster:"math", clusterName:"数学应用题词 · 10/16",
+   en:"the price you pay for something; to have a price", zh:"花费；价钱",
+   sent:"How much does a ticket to Beijing <span class='hl'>cost</span>?",
+   tip:"💡 应用题里常见：How much does it cost? = 它多少钱？ The taxi costs 13 yuan = 出租车要 13 元。"},
+  {word:"whole", syl:"whole", pos:"adj. / n.", cluster:"math", clusterName:"数学应用题词 · 10/16",
+   en:"all of something; one complete thing", zh:"整个的；一个整体",
+   sent:"Four quarters make one <span class='hl'>whole</span> cup.",
+   tip:"💡 分数里很重要：4/4 = 1 whole（一个整体）。the whole taxi ride = 整趟出租车。whole 和 hole（洞）读音一样！"}
 ];
 var idx = 0, flipped = false, marks = [], mode = "study", deck = [];
 
