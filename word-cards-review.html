@@ -51,6 +51,7 @@
   }
   .chip.group{background:var(--c-group);} .chip.feel{background:var(--c-feel);}
   .chip.quality{background:var(--c-quality);} .chip.chunk{background:var(--c-chunk);}
+  .chip.story{background:#8E6BD8;}
   .speaker{
     position:absolute; top:16px; right:18px; border:none; background:#fff3d9; width:42px; height:42px;
     border-radius:50%; font-size:19px; cursor:pointer; box-shadow:0 2px 6px rgba(43,43,58,.12);
@@ -123,7 +124,7 @@
 <body data-page-node-id="PphWZq68DpEMnfylkNkWw1">
 <header data-page-node-id="OtU2UJa79heuOS1LKXa3wv">
   <h1 data-page-node-id="fSumOeyKIstfPF1T5syBYX"><span class="emoji" data-page-node-id="JnJkJ0BJeu7DveVhdld7cJ">📚</span>我的复习词卡</h1>
-  <p class="sub" data-page-node-id="46Lf1Ali0GaKd5teYhtKOW">Class Words Review · 共 11 张 · 点击卡片翻面</p>
+  <p class="sub" data-page-node-id="46Lf1Ali0GaKd5teYhtKOW">Class Words Review · 共 16 张 · 点击卡片翻面</p>
   <div class="toolbar" data-page-node-id="GFcq3tyoCq5zIdjU0amkZ3">
     <button class="pill active" id="modeStudy" data-page-node-id="zn25DInYQj4xagAA1Rj5DE">📖 学习模式</button>
     <button class="pill" id="modeQuiz" data-page-node-id="1vJd35PmUnaWgyD1KxCgwA">🎯 测验模式</button>
@@ -131,7 +132,7 @@
   </div>
 </header>
 <div class="stage" data-page-node-id="HTQuLVYWb2SKBOMqN3RIFH">
-  <div class="counter" id="counter" data-page-node-id="B8LfwsU7QvGgkxuwhAbAw5">1 / 11</div>
+  <div class="counter" id="counter" data-page-node-id="B8LfwsU7QvGgkxuwhAbAw5">1 / 16</div>
   <div class="cardzone" data-page-node-id="cI7VFHkPr2lUhjp8kWP7kW">
     <div class="card" id="card" data-page-node-id="GuTfMZ67pYzcYH5zgO28Da">
       <div class="card-inner" data-page-node-id="GTykjvVSUCdVvHdAgvKrxB">
@@ -210,7 +211,7 @@ var CARDS = [
   {word:"punished", syl:"pun · ished", pos:"v. 动词（过去式）", cluster:"feel", clusterName:"心情与请求",
    en:"got in trouble for doing something wrong", zh:"惩罚；受罚",
    sent:"The lion was <span class='hl'>punished</span> for his rudeness.",
-   tip:"💡 punish（惩罚）+ ed = 过去「被罚了一顿」。"},
+   tip:"💡 punish（惩罚）+ ed = 过去「被罚了一顿」。（10/14 又遇到了一次，要多复习！）"},
   {word:"pleaded", syl:"plead · ed", pos:"v. 动词（过去式）", cluster:"feel", clusterName:"心情与请求",
    en:"asked in a sad, begging way", zh:"恳求；央求",
    sent:"The mouse <span class='hl'>pleaded</span>, \"Please don't eat me!\"",
@@ -234,7 +235,27 @@ var CARDS = [
   {word:"more than", syl:"more · than", pos:"关键词组", cluster:"chunk", clusterName:"关键词组",
    en:"over a number; not just — more than 是「整包」意思：超过 / 不只是", zh:"超过；不只是",
    sent:"The king was <span class='hl'>more than</span> angry — he was furious!",
-   tip:"💡 记整包，不拆开：more than angry = 不只是生气（气炸了）。"}
+   tip:"💡 记整包，不拆开：more than angry = 不只是生气（气炸了）。"},
+  {word:"wept", syl:"wept", pos:"v. 动词（过去式）", cluster:"story", clusterName:"神话故事词 · 10/14",
+   en:"cried (weep → wept)", zh:"哭了；流泪（weep 的过去式）",
+   sent:"The little bird <span class='hl'>wept</span> when it lost its way home.",
+   tip:"💡 weep → wept，和 sleep → slept、keep → kept 是一样的变法。"},
+  {word:"mercy", syl:"mer · cy", pos:"n. 名词", cluster:"story", clusterName:"神话故事词 · 10/14",
+   en:"being kind and not punishing someone", zh:"怜悯；饶恕",
+   sent:"The lion showed <span class='hl'>mercy</span> and let the mouse go.",
+   tip:"💡 have mercy = 手下留情。mercy 和 punish 是一对「反义」做法。"},
+  {word:"steal", syl:"steal", pos:"v. 动词", cluster:"story", clusterName:"神话故事词 · 10/14",
+   en:"to take something that is not yours", zh:"偷",
+   sent:"A naughty crow tried to <span class='hl'>steal</span> the seeds.",
+   tip:"💡 steal（偷）和 steel（钢）读音一样，意思完全不同！"},
+  {word:"fate", syl:"fate", pos:"n. 名词", cluster:"story", clusterName:"神话故事词 · 10/14",
+   en:"what will happen to someone in the future, which they cannot change", zh:"命运",
+   sent:"The hero believed it was his <span class='hl'>fate</span> to go home one day.",
+   tip:"💡 神话里常说 \"His fate is sealed\"——他的命运已经注定了。"},
+  {word:"sealed", syl:"sealed", pos:"v. / adj.（过去分词）", cluster:"story", clusterName:"神话故事词 · 10/14",
+   en:"closed tightly; (fate) decided and cannot change", zh:"封住了；（命运）注定了",
+   sent:"The magic door was <span class='hl'>sealed</span>. Nobody could open it.",
+   tip:"💡 两个意思：门被 sealed = 封住了；fate is sealed = 命运注定了。"}
 ];
 var idx = 0, flipped = false, marks = [], mode = "study", deck = [];
 
