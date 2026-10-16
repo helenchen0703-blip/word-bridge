@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Xiaoxue's Way Home</title>
+<style>
+:root{
+  --bg:#EAF4EC; --ink:#22303A; --muted:#5E6B73; --card:#fff; --line:#D5E2D8;
+  --wall:#3E5A47; --path:#F7F3E8; --fog:#1E2B24; --gold:#F2B33D; --red:#D9534F; --teal:#1D9E75; --purple:#5B4FC4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"PingFang SC","Hiragino Sans GB",-apple-system,"Segoe UI",sans-serif;-webkit-user-select:none;user-select:none}
+.wrap{max-width:640px;margin:0 auto;padding:14px 16px 30px}
+h1{font-size:26px;margin:4px 0 2px;text-align:center}
+.zh{font-size:14px;color:var(--muted)}
+.screen{background:var(--card);border-radius:20px;padding:18px;border:1px solid var(--line)}
+.center{text-align:center}
+button{font:inherit;cursor:pointer;border:none;border-radius:14px;padding:12px 18px;font-weight:700}
+.big{background:var(--purple);color:#fff;font-size:18px;padding:14px 26px}
+.levels{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.levels button{background:#F1EFFB;color:var(--purple);border:2px solid transparent;min-width:130px}
+.levels button.sel{border-color:var(--purple);background:#fff}
+.levels small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.story{font-size:17px;line-height:1.6;margin:12px 0}
+.hud{display:flex;justify-content:space-between;align-items:center;margin:8px 0;font-weight:700;font-size:15px;flex-wrap:wrap;gap:6px}
+.feathers{letter-spacing:2px;font-size:20px}
+.gates{color:var(--gold)}
+canvas{display:block;width:100%;border-radius:16px;background:var(--fog);touch-action:none}
+.pad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,58px);gap:8px;justify-content:center;margin-top:12px}
+.pad button{background:#fff;border:2px solid var(--line);font-size:24px;padding:0;color:var(--ink)}
+.pad button:active{background:#F1EFFB}
+.pad .up{grid-column:2}
+.pad .left{grid-column:1;grid-row:2}.pad .down{grid-column:2;grid-row:2}.pad .right{grid-column:3;grid-row:2}
+.tip{font-size:13px;color:var(--muted);text-align:center;margin-top:8px}
+.modal{position:fixed;inset:0;background:rgba(20,30,25,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal[hidden]{display:none}
+.qcard{background:#fff;border-radius:22px;padding:20px;max-width:460px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.qtag{display:inline-block;background:#FFF3D6;color:#8A5A00;font-weight:700;font-size:13px;padding:3px 10px;border-radius:999px}
+.qtext{font-size:21px;font-weight:700;margin:12px 0 16px;line-height:1.45}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts button{background:#F4F7F5;border:2px solid var(--line);font-size:20px;padding:14px 8px;color:var(--ink)}
+.opts button.right{background:#DDF5EA;border-color:var(--teal)}
+.opts button.wrong{background:#FBE4E3;border-color:var(--red);opacity:.6}
+.qmsg{min-height:26px;margin-top:12px;font-weight:700;text-align:center}
+.qmsg.good{color:var(--teal)}.qmsg.bad{color:var(--red)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1;margin:0 2px;font-size:.92em}
+.frac .n{border-bottom:2px solid currentColor;padding:0 3px 1px}
+.frac .d{padding:1px 3px 0}
+.end svg{width:100%;max-width:420px;display:block;margin:0 auto}
+.stats{display:flex;justify-content:center;gap:18px;font-weight:700;margin:10px 0}
+@keyframes pet{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(-6px,6px) rotate(-6deg)}}
+@keyframes fall{0%{transform:translateY(-60px);opacity:0}20%{opacity:1}100%{transform:translateY(0);opacity:1}}
+@keyframes heart{0%{transform:translateY(0) scale(.6);opacity:0}30%{opacity:1}100%{transform:translateY(-50px) scale(1.1);opacity:0}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.hand{animation:pet 1.1s ease-in-out infinite;transform-box:fill-box;transform-origin:right bottom}
+.seed{animation:fall 1s ease-out both}
+.h1{animation:heart 1.8s ease-out infinite}.h2{animation:heart 1.8s ease-out .6s infinite}.h3{animation:heart 1.8s ease-out 1.2s infinite}
+.bird{animation:bob 1.2s ease-in-out infinite}
+.tlink{background:none;color:var(--muted);font-weight:400;font-size:13px;padding:6px 10px;text-decoration:underline;margin-top:10px}
+.dcard{max-width:620px}
+.dcanvas{display:block;width:100%;height:300px;border:2px solid var(--line);border-radius:14px;background:#fff;touch-action:none;margin-top:8px}
+.dtools{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.dtools button{background:#F4F7F5;border:2px solid var(--line);padding:6px 10px;font-size:14px;font-weight:700}
+.dtools button.sel{border-color:var(--purple);background:#fff}
+.dot{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:-3px}
+.hintbox{background:#E1F5EE;color:#085041;border-radius:12px;padding:8px 12px;margin-top:8px;font-size:15px}
+.ans{display:flex;gap:8px;margin-top:10px;align-items:center}
+.ans input{flex:1;font:inherit;font-size:20px;padding:10px 12px;border:2px solid var(--line);border-radius:12px}
+.err{color:var(--red);font-size:14px;margin-top:4px;min-height:18px}
+.teach{background:#FFF6E0;border-radius:14px;padding:12px;margin-top:10px}
+.teach b{color:#8A5A00}
+.teach .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.teach button{font-size:15px}
+.ok{background:var(--teal);color:#fff}.help{background:#fff;border:2px solid var(--gold);color:#8A5A00}
+.logcard{max-width:720px;max-height:88vh;overflow:auto;text-align:left}
+.logcard table{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0 12px}
+.logcard th,.logcard td{border:1px solid var(--line);padding:5px 7px;text-align:left;vertical-align:top}
+.logcard th{background:#F1EFE8}
+.logcard img{max-width:220px;border:1px solid var(--line);border-radius:8px;display:block}
+.logcard h3{margin:14px 0 4px;font-size:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- START -->
+<div id="start" class="screen center">
+  <svg viewBox="0 0 200 170" width="170" aria-label="Xiaoxue the white parrot">
+    <g class="bird">
+      <path d="M86 38 L74 6 L92 30 Z M96 32 L92 0 L104 28 Z M106 32 L114 2 L114 32 Z M114 38 L130 10 L122 40 Z" fill="#fff" stroke="#9AA5A0" stroke-width="2" stroke-linejoin="round"/>
+      <ellipse cx="104" cy="112" rx="40" ry="48" fill="#fff" stroke="#9AA5A0" stroke-width="2.5"/>
+      <circle cx="104" cy="60" r="30" fill="#fff" stroke="#9AA5A0" stroke-width="2.5"/>
+      <path d="M120 64 q16 2 14 16 q-8 -6 -16 -4 z" fill="#3B3F45"/>
+      <circle cx="112" cy="54" r="5" fill="#22303A"/><circle cx="113.5" cy="52.5" r="1.6" fill="#fff"/>
+      <ellipse cx="96" cy="66" rx="6" ry="4" fill="#FFD9D2" opacity=".8"/>
+      <path d="M70 108 q-14 30 6 52 q4 -28 -6 -52z" fill="#F4F6F5" stroke="#9AA5A0" stroke-width="2"/>
+      <path d="M92 158 l-4 10 M100 160 l0 10 M112 158 l4 10" stroke="#8C8C8C" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </svg>
+  <h1>Xiaoxue's Way Home</h1>
+  <div class="zh">小雪回家</div>
+  <p class="story">Xiaoxue is a white parrot with a feather crest. She got lost a long, long time ago. Her owner misses her so much!<br>
+  Help Xiaoxue find her way <b>home</b> through the dark maze. Magic gates will ask you <b>fraction questions</b> and <b>word questions</b>. Be careful — every wrong answer costs a feather! 🪶</p>
+  <div class="levels" id="levels">
+    <button data-l="0">Hard<small>4 gates · some fog</small></button>
+    <button data-l="1" class="sel">Very hard<small>6 gates · dark fog</small></button>
+    <button data-l="2">Super hard<small>8 gates · huge maze</small></button>
+  </div>
+  <div id="treasureStart"></div>
+  <button class="big" id="go" style="margin-top:14px">Start the journey ▶</button>
+  <p class="tip">Arrow keys or the buttons to move · 方向键或按钮移动</p>
+  <button class="tlink" data-tlog>老师记录</button>
+</div>
+
+<!-- GAME -->
+<div id="game" hidden>
+  <div class="hud">
+    <span class="feathers" id="feathers"></span>
+    <span class="gates" id="gates"></span>
+    <span id="steps"></span>
+  </div>
+  <canvas id="cv"></canvas>
+  <div class="pad">
+    <button class="up" data-d="up" aria-label="up">▲</button>
+    <button class="left" data-d="left" aria-label="left">◀</button>
+    <button class="down" data-d="down" aria-label="down">▼</button>
+    <button class="right" data-d="right" aria-label="right">▶</button>
+  </div>
+  <p class="tip">The maze is dark. Xiaoxue can only see a little around her. Find the 🏠!</p>
+</div>
+
+<!-- END -->
+<div id="end" class="screen center end" hidden>
+  <h1>Welcome home, Xiaoxue!</h1>
+  <div class="zh">小雪终于回家了！</div>
+  <svg viewBox="0 0 400 300" aria-label="The owner pets Xiaoxue and gives her sunflower seeds">
+    <rect x="0" y="0" width="400" height="300" rx="20" fill="#FFF6E5"/>
+    <rect x="0" y="230" width="400" height="70" fill="#E9D3AE"/>
+    <rect x="30" y="40" width="90" height="70" rx="6" fill="#CFE8F7" stroke="#B88A52" stroke-width="5"/>
+    <line x1="75" y1="40" x2="75" y2="110" stroke="#B88A52" stroke-width="4"/>
+    <!-- owner -->
+    <circle cx="300" cy="80" r="34" fill="#F6D2B5"/>
+    <path d="M266 76 q4 -42 36 -40 q30 0 34 40 q-12 -18 -34 -18 q-22 0 -36 18z" fill="#3A2A22"/>
+    <path d="M288 84 q4 4 8 0 M308 84 q4 4 8 0" stroke="#3A2A22" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M292 98 q10 8 20 0" stroke="#C0504D" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M250 230 q0 -100 50 -112 q50 12 50 112z" fill="#7FB3D5"/>
+    <!-- petting arm -->
+    <g class="hand"><path d="M262 150 q-40 0 -70 6" stroke="#7FB3D5" stroke-width="22" stroke-linecap="round" fill="none"/><ellipse cx="186" cy="152" rx="16" ry="11" fill="#F6D2B5"/></g>
+    <!-- seed bowl -->
+    <ellipse cx="150" cy="232" rx="44" ry="10" fill="#9C6B3F"/>
+    <path d="M106 222 q44 30 88 0z" fill="#B9834F"/>
+    <g fill="#3A3A3A" stroke="#EDEDED" stroke-width="1.2">
+      <ellipse class="seed" style="animation-delay:.2s" cx="132" cy="220" rx="5" ry="8" transform="rotate(-20 132 220)"/>
+      <ellipse class="seed" style="animation-delay:.5s" cx="146" cy="218" rx="5" ry="8" transform="rotate(15 146 218)"/>
+      <ellipse class="seed" style="animation-delay:.8s" cx="160" cy="221" rx="5" ry="8" transform="rotate(-8 160 221)"/>
+      <ellipse class="seed" style="animation-delay:1.1s" cx="171" cy="217" rx="5" ry="8" transform="rotate(25 171 217)"/>
+      <ellipse class="seed" style="animation-delay:1.4s" cx="139" cy="214" rx="5" ry="8" transform="rotate(5 139 214)"/>
+    </g>
+    <!-- Xiaoxue -->
+    <g transform="translate(118 112) scale(.62)">
+      <path d="M86 38 L74 6 L92 30 Z M96 32 L92 0 L104 28 Z M106 32 L114 2 L114 32 Z M114 38 L130 10 L122 40 Z" fill="#fff" stroke="#9AA5A0" stroke-width="2.5" stroke-linejoin="round"/>
+      <ellipse cx="104" cy="112" rx="40" ry="48" fill="#fff" stroke="#9AA5A0" stroke-width="3"/>
+      <circle cx="104" cy="60" r="30" fill="#fff" stroke="#9AA5A0" stroke-width="3"/>
+      <path d="M120 64 q16 2 14 16 q-8 -6 -16 -4 z" fill="#3B3F45"/>
+      <path d="M106 54 q6 -6 12 0" stroke="#22303A" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <ellipse cx="96" cy="68" rx="7" ry="5" fill="#FFB8AC"/>
+      <path d="M92 158 l-4 10 M100 160 l0 10 M112 158 l4 10" stroke="#8C8C8C" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <!-- hearts -->
+    <g font-size="26"><text class="h1" x="150" y="100">❤️</text><text class="h2" x="196" y="86">💛</text><text class="h3" x="230" y="110">❤️</text></g>
+    <rect x="18" y="246" width="364" height="44" rx="12" fill="#fff" opacity=".92"/>
+    <text x="200" y="266" text-anchor="middle" font-size="15" font-weight="700" fill="#22303A">“Xiaoxue! I missed you so much!</text>
+    <text x="200" y="284" text-anchor="middle" font-size="15" font-weight="700" fill="#22303A">Here are your favorite sunflower seeds.”</text>
+  </svg>
+  <p class="zh" style="margin-top:8px">主人轻轻地摸着小雪：“小雪！我好想你！这是你最爱吃的瓜子。”</p>
+  <div class="stats"><span id="eTime"></span><span id="eSteps"></span><span id="eRight"></span></div>
+  <div id="eBest" class="zh"></div>
+  <div id="treasureEnd"></div>
+  <button class="big" id="again" style="margin-top:12px">Play again (new maze) ↻</button>
+  <div><button class="tlink" data-tlog>老师记录</button></div>
+</div>
+
+</div>
+
+<!-- QUESTION MODAL -->
+<div class="modal" id="qmodal" hidden>
+  <div class="qcard">
+    <span class="qtag" id="qtag"></span>
+    <div class="qtext" id="qtext"></div>
+    <div class="opts" id="opts"></div>
+    <div class="qmsg" id="qmsg"></div>
+  </div>
+</div>
+
+<!-- MESSAGE MODAL -->
+<div class="modal" id="mmodal" hidden>
+  <div class="qcard center">
+    <div style="font-size:46px" id="mIcon"></div>
+    <div class="qtext" id="mText"></div>
+    <button class="big" id="mBtn">OK</button>
+  </div>
+</div>
+
+<!-- DRAWING GATE MODAL -->
+<div class="modal" id="dmodal" hidden>
+  <div class="qcard dcard">
+    <span class="qtag">✏️ Drawing gate · Draw it yourself!</span>
+    <div class="qtext" id="dtext" style="font-size:19px"></div>
+    <canvas class="dcanvas" id="dcv"></canvas>
+    <div class="dtools" id="dtools"></div>
+    <div class="row" style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span style="font-size:13px;color:var(--muted)">Stuck? One hint at a time:</span><button class="help" id="dhintBtn" style="padding:6px 12px;font-size:14px">I need a hint</button>
+    </div>
+    <div id="dhints"></div>
+    <div class="ans"><span style="font-weight:700">My answer:</span><input id="dans" type="text" placeholder="e.g. 6/3 or 2" inputmode="text"></div>
+    <div class="err" id="derr"></div>
+    <button class="big" id="ddone" style="width:100%">I'm done! Show my teacher ✅</button>
+    <div class="teach" id="dteach" hidden>
+      <div><b>老师判断</b>（她画出“几组 × 每组多少”了吗？）</div>
+      <div style="font-size:14px;margin-top:4px" id="dauto"></div>
+      <input id="dnote" type="text" placeholder="备注：她怎么画的、说了什么（可不填）" style="width:100%;margin-top:8px;font:inherit;padding:8px;border:1px solid var(--line);border-radius:10px">
+      <div class="row">
+        <button class="ok" id="dok">✓ 自己画对了，开门</button>
+        <button class="help" id="dhelp">还需要帮助（记录后开门）</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TEACHER LOG MODAL -->
+<div class="modal" id="tmodal" hidden>
+  <div class="qcard logcard">
+    <div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:20px">老师记录</b><button id="tclose" style="background:#F1EFE8">关闭</button></div>
+    <div id="tbody"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+      <button class="ok" id="tcopy">复制文字记录</button>
+      <button id="tdl" style="background:#F1EFFB;color:var(--purple)">下载文字记录（.txt）</button>
+      <button id="tclear" style="background:#fff;border:2px solid var(--red);color:var(--red)">清空记录</button>
+    </div>
+    <div id="tmsg" style="margin-top:6px;font-size:14px;color:var(--teal)"></div>
+  </div>
+</div>
+
+<script>
+/* ---------- settings ---------- */
+const LEVELS = [
+  {size: 11, gates: 4, view: 3.2, feathers: 5},
+  {size: 13, gates: 6, view: 2.3, feathers: 5},
+  {size: 17, gates: 8, view: 2.0, feathers: 4}
+];
+let level = 1;
+document.querySelectorAll('#levels button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#levels button').forEach(x => x.classList.remove('sel'));
+  b.classList.add('sel'); level = Number(b.dataset.l);
+});
+
+/* ---------- helpers ---------- */
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const gcd = (a, b) => b ? gcd(b, a % b) : a;
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const F = (n, d) => `<span class="frac"><span class="n">${n}</span><span class="d">${d}</span></span>`;
+const MIX = (w, n, d) => `${w}${F(n, d)}`;
+const key = s => s.replace(/<[^>]+>/g, '');
+
+/* ---------- fraction questions (Grade 4) ---------- */
+function uniqueOpts(correct, wrongs) {
+  const seen = new Set([key(correct)]), out = [correct];
+  for (const w of wrongs) { if (out.length === 4) break; if (!seen.has(key(w))) { seen.add(key(w)); out.push(w); } }
+  return shuffle(out);
+}
+const Q = [
+  // 1 fraction x whole number (school Unit 3)
+  () => { const d = pick([3,4,5,6,8]), n = rnd(1, d - 1), k = rnd(2, 6);
+    return { tag: 'Equal groups', text: `${k} × ${F(n, d)} = ?`, ans: F(n * k, d),
+      wrong: [F(n, d * k), F(n + k, d), F(n * k, d * k), F(n * k + 1, d)] }; },
+  // 2 story: Xiaoxue eats seeds
+  () => { const d = pick([3,4,5,8]), n = rnd(1, d - 1), k = rnd(3, 7);
+    return { tag: 'Seed problem', text: `Xiaoxue eats ${F(n, d)} cup of sunflower seeds each day. How many cups does she eat in ${k} days?`,
+      ans: F(n * k, d), wrong: [F(n, d * k), F(n + k, d + k), F(n * k, d * k), F(k, d)] }; },
+  // 3 equivalent fractions
+  () => { const d = pick([2,3,4,5,6]), n = rnd(1, d - 1), m = rnd(2, 4);
+    return { tag: 'Same amount', text: `Which fraction is equal to ${F(n, d)}?`, ans: F(n * m, d * m),
+      wrong: [F(n + m, d + m), F(n * m, d), F(n, d * m), F(n * m + 1, d * m)] }; },
+  // 4 compare
+  () => { let a, b, c, d; do { b = pick([3,4,5,6,8]); d = pick([3,4,5,6,8]); a = rnd(1, b - 1); c = rnd(1, d - 1); } while (a * d === b * c || b === d);
+    const big = a * d > b * c ? F(a, b) : F(c, d);
+    return { tag: 'Which is bigger?', text: `Which fraction is <b>bigger</b>: ${F(a, b)} or ${F(c, d)}?`, ans: big,
+      wrong: [a * d > b * c ? F(c, d) : F(a, b), 'They are equal', F(a + c, b + d)] }; },
+  // 5 add like denominators
+  () => { const d = pick([5,6,7,8,9,10]), a = rnd(1, d - 2), b = rnd(1, d - 1 - a);
+    return { tag: 'Add', text: `${F(a, d)} + ${F(b, d)} = ?`, ans: F(a + b, d),
+      wrong: [F(a + b, d + d), F(a * b, d), F(a + b + 1, d), F(Math.abs(a - b) || 1, d)] }; },
+  // 6 improper -> mixed
+  () => { const d = pick([3,4,5,6]), w = rnd(1, 3), r = rnd(1, d - 1), n = w * d + r;
+    return { tag: 'Mixed number', text: `${F(n, d)} = ?`, ans: MIX(w, r, d),
+      wrong: [MIX(w + 1, r, d), MIX(w, d - r, d), MIX(r, w, d), MIX(w, r, n)] }; },
+  // 7 reading fractions in English (school vocabulary)
+  () => { const items = [
+      ['five quarters', F(5,4), [MIX(5,1,4), F(4,5), MIX(1,1,5)]],
+      ['five AND a quarter', MIX(5,1,4), [F(5,4), F(1,5), MIX(1,5,4)]],
+      ['three quarters', F(3,4), [F(4,3), MIX(3,1,4), F(1,3)]],
+      ['two thirds', F(2,3), [F(3,2), MIX(2,1,3), F(1,3)]],
+      ['seven eighths', F(7,8), [F(8,7), MIX(7,1,8), F(1,8)]],
+      ['two and a half', MIX(2,1,2), [F(2,2), F(5,4), MIX(1,2,2)]]];
+    const [w, a, wr] = pick(items);
+    return { tag: 'Read it in English', text: `Which number is “<b>${w}</b>”?`, ans: a, wrong: wr }; },
+  // 8 "of" means multiply
+  () => { const d = pick([2,3,4,5,6]), n = rnd(1, d - 1), k = rnd(2, 5), total = d * k;
+    return { tag: '“of” means ×', text: `There are ${total} seeds. Xiaoxue eats ${F(n, d)} <b>of</b> them. How many seeds does she eat?`, ans: String(n * k),
+      wrong: [String(k), String(total - n * k), String(n * k + d), String(n + k)] }; },
+  // 9 left over (school pizza style)
+  () => { const d = 3, n = 2, k = pick([4,5]), need = Math.ceil(n * k / d), left = need * d - n * k;
+    return { tag: 'Bags of seeds', text: `Each parrot wants ${F(n, d)} of a bag of seeds. There are ${k} parrots. How many <b>whole bags</b> must the owner buy?`, ans: String(need),
+      wrong: [String(need - 1), String(need + 1), String(k), F(n * k, d)] }; }
+];
+let lastQ = -1;
+function makeQuestion(gateNo) {
+  // later gates use harder question types more often
+  const pool = gateNo < 2 ? [0,2,4,6] : gateNo < 4 ? [0,1,3,5,6,7] : [1,3,5,7,8,0];
+  let i; do { i = pick(pool); } while (i === lastQ && pool.length > 1);
+  lastQ = i;
+  const q = Q[i](); q.opts = uniqueOpts(q.ans, shuffle(q.wrong)); return q;
+}
+
+/* ---------- word gates (words from class, Pandora's Box) ---------- */
+const VOCAB = [
+  {w:'wept',     m:'哭了（weep 的过去式）', s:'Xiaoxue was lost and alone, so she <b>wept</b> all night.', b:'Xiaoxue was lost and alone, so she ____ all night.'},
+  {w:'mercy',    m:'怜悯，饶恕',             s:'The big cat showed <b>mercy</b> and let Xiaoxue fly away.', b:'The big cat showed ____ and let Xiaoxue fly away.'},
+  {w:'steal',    m:'偷',                     s:'A naughty crow tried to <b>steal</b> Xiaoxue’s seeds.', b:'A naughty crow tried to ____ Xiaoxue’s seeds.'},
+  {w:'punished', m:'受到惩罚',               s:'The crow was <b>punished</b> for taking the seeds.', b:'The crow was ____ for taking the seeds.'},
+  {w:'fate',     m:'命运',                   s:'Xiaoxue believed it was her <b>fate</b> to go home one day.', b:'Xiaoxue believed it was her ____ to go home one day.'},
+  {w:'sealed',   m:'封住了；（命运）注定了', s:'The magic gate was <b>sealed</b>. Only a right answer can open it.', b:'The magic gate was ____. Only a right answer can open it.'}
+];
+const VKEY = 'xiaoxue-words-v1';
+let vstat = {};
+try { vstat = JSON.parse(localStorage.getItem(VKEY) || '{}') || {}; } catch (e) { vstat = {}; }
+VOCAB.forEach(v => { vstat[v.w] = vstat[v.w] || {streak: 0, right: 0, wrong: 0, mastered: false}; });
+function saveV() { try { localStorage.setItem(VKEY, JSON.stringify(vstat)); } catch (e) {} }
+let forceWord = null, lastWord = null;
+function makeWordQuestion() {
+  let v;
+  if (forceWord) { v = VOCAB.find(x => x.w === forceWord); forceWord = null; }
+  else {
+    const notMastered = VOCAB.filter(x => !vstat[x.w].mastered && x.w !== lastWord);
+    const pool = notMastered.length ? notMastered : VOCAB.filter(x => x.w !== lastWord);
+    const low = Math.min(...pool.map(x => vstat[x.w].streak));
+    v = pick(pool.filter(x => vstat[x.w].streak === low));
+  }
+  lastWord = v.w;
+  const others = shuffle(VOCAB.filter(x => x.w !== v.w)).slice(0, 3);
+  if (Math.random() < .5) {
+    return {tag: 'Word gate · What does it mean?', word: v.w, explain: `${v.w} = ${v.m}`,
+      text: `What does <b>${v.w}</b> mean?<div style="font-size:17px;font-weight:400;margin-top:8px;color:#5E6B73">${v.s}</div>`,
+      ans: v.m, opts: shuffle([v.m].concat(others.map(x => x.m)))};
+  }
+  return {tag: 'Word gate · Fill the gap', word: v.w, explain: `${v.w} = ${v.m}`,
+    text: v.b, ans: v.w, opts: shuffle([v.w].concat(others.map(x => x.w)))};
+}
+function renderTreasure(id) {
+  const el = document.getElementById(id); if (!el) return;
+  const n = VOCAB.filter(v => vstat[v.w].mastered).length;
+  el.innerHTML = `<div style="font-weight:700;margin:12px 0 6px">📜 Word treasure: ${n} / ${VOCAB.length} mastered</div>` +
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">' +
+    VOCAB.map(v => { const st = vstat[v.w], done = st.mastered;
+      return `<span style="padding:5px 10px;border-radius:999px;font-size:14px;font-weight:700;background:${done ? '#DDF5EA' : '#F1EFFB'};color:${done ? '#0F6E56' : '#5B4FC4'}">${v.w} ${done ? '✅' : '⭐'.repeat(Math.min(st.streak, 1)) + '☆'.repeat(2 - Math.min(st.streak, 1))}</span>`; }).join('') +
+    '</div><div style="font-size:12px;color:#5E6B73;margin-top:6px">Answer a word right 2 times in a row to master it.</div>';
+}
+
+/* ---------- teacher log ---------- */
+const LKEY = 'xiaoxue-log-v1';
+let LOG = [];
+try { LOG = JSON.parse(localStorage.getItem(LKEY) || '[]') || []; } catch (e) { LOG = []; }
+let cur = null;
+function saveLog() {
+  LOG.forEach((s, i) => { if (i < LOG.length - 12) s.events.forEach(e => { if (e.img) e.img = ''; }); });
+  if (LOG.length > 40) LOG = LOG.slice(-40);
+  try { localStorage.setItem(LKEY, JSON.stringify(LOG)); }
+  catch (e) { LOG.forEach(s => s.events.forEach(ev => { if (ev.img && s !== cur) ev.img = ''; })); try { localStorage.setItem(LKEY, JSON.stringify(LOG)); } catch (e2) {} }
+}
+function logEv(ev) { if (!cur) return; ev.t = new Date().toISOString(); cur.events.push(ev); saveLog(); }
+
+/* ---------- drawing gate ---------- */
+const DRAWQ = [
+  {text: 'Xiaoxue eats <b>2/3</b> cup of sunflower seeds every day. How many cups of seeds does she eat in <b>3 days</b>?', v: 2, plain: '3 days × 2/3 cup'},
+  {text: 'Xiaoxue has <b>4</b> bird friends. She gives each friend <b>3/4</b> of a cookie. How many cookies does she give away?', v: 3, plain: '4 friends × 3/4 cookie'},
+  {text: 'Xiaoxue flies <b>5/6</b> of a mile every hour. How far does she fly in <b>4 hours</b>?', v: 20 / 6, plain: '4 hours × 5/6 mile'},
+  {text: 'Each of Xiaoxue’s <b>5</b> toys needs <b>2/5</b> of a bell. How many bells does she need?', v: 2, plain: '5 toys × 2/5 bell'}
+];
+function parseNum(str) {
+  const s = String(str).trim().replace(/\s+/g, ' ');
+  let m;
+  if ((m = s.match(/^(\d+) (\d+)\/(\d+)$/))) return +m[1] + (+m[2]) / (+m[3]);
+  if ((m = s.match(/^(\d+)\/(\d+)$/))) return (+m[1]) / (+m[2]);
+  if ((m = s.match(/^\d+(\.\d+)?$/))) return +s;
+  return null;
+}
+const dcv = document.getElementById('dcv'), dctx = dcv.getContext('2d');
+let dStrokes = [], dColor = '#22303A', dErase = false, dDown = false;
+function dResize() { const r = dcv.getBoundingClientRect(), p = window.devicePixelRatio || 1; dcv.width = r.width * p; dcv.height = r.height * p; dctx.setTransform(p, 0, 0, p, 0, 0); dRedraw(); }
+function dRedraw() {
+  dctx.fillStyle = '#fff'; dctx.fillRect(0, 0, dcv.width, dcv.height);
+  dStrokes.forEach(s => { dctx.beginPath(); dctx.lineCap = 'round'; dctx.lineJoin = 'round'; dctx.strokeStyle = s.e ? '#fff' : s.c; dctx.lineWidth = s.e ? 22 : 3.5;
+    s.p.forEach((q, i) => i ? dctx.lineTo(q[0], q[1]) : dctx.moveTo(q[0], q[1])); dctx.stroke(); });
+}
+function dPos(e) { const r = dcv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+dcv.addEventListener('pointerdown', e => { dDown = true; dcv.setPointerCapture(e.pointerId); dStrokes.push({c: dColor, e: dErase, p: [dPos(e)]}); });
+dcv.addEventListener('pointermove', e => { if (dDown) { dStrokes[dStrokes.length - 1].p.push(dPos(e)); dRedraw(); } });
+['pointerup', 'pointercancel'].forEach(ev => dcv.addEventListener(ev, () => dDown = false));
+(function tools() {
+  const t = document.getElementById('dtools');
+  ['#22303A', '#E8603C', '#2F7DD1', '#1D9E75'].forEach((c, i) => { const b = document.createElement('button'); b.innerHTML = `<span class="dot" style="background:${c}"></span>`; if (!i) b.classList.add('sel');
+    b.onclick = () => { dColor = c; dErase = false; t.querySelectorAll('button').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); }; t.appendChild(b); });
+  const er = document.createElement('button'); er.textContent = 'Eraser'; er.onclick = () => { dErase = true; t.querySelectorAll('button').forEach(x => x.classList.remove('sel')); er.classList.add('sel'); }; t.appendChild(er);
+  const un = document.createElement('button'); un.textContent = 'Undo'; un.onclick = () => { dStrokes.pop(); dRedraw(); }; t.appendChild(un);
+  const cl = document.createElement('button'); cl.textContent = 'Clear'; cl.onclick = () => { dStrokes = []; dRedraw(); }; t.appendChild(cl);
+})();
+const DHINTS = ['<b>Hint 1:</b> How many groups? How much in each group?',
+  '<b>Hint 2:</b> Remember Jars of Slime: 5 jars, 3/4 cup in each jar. Can you draw it the same way?',
+  '<b>Hint 3:</b> Ask your teacher to draw the first group. Then you draw the rest.'];
+function askDraw(g) {
+  busy = true;
+  const dq = pick(DRAWQ); let hints = 0;
+  document.getElementById('dtext').innerHTML = dq.text;
+  document.getElementById('dhints').innerHTML = ''; document.getElementById('dans').value = '';
+  document.getElementById('derr').textContent = ''; document.getElementById('dnote').value = '';
+  document.getElementById('dteach').hidden = true; document.getElementById('ddone').hidden = false;
+  dStrokes = []; document.getElementById('dmodal').hidden = false; dResize();
+  document.getElementById('dhintBtn').onclick = () => { if (hints < 3) { hints++; document.getElementById('dhints').innerHTML = DHINTS.slice(0, hints).map(h => `<div class="hintbox">${h}</div>`).join(''); } };
+  document.getElementById('dans').oninput = () => document.getElementById('derr').textContent = '';
+  let auto = null, ansText = '';
+  document.getElementById('ddone').onclick = () => {
+    ansText = document.getElementById('dans').value.trim();
+    if (!ansText) { document.getElementById('derr').textContent = 'Write your answer first.'; return; }
+    if (!dStrokes.length) { document.getElementById('derr').textContent = 'Draw it first!'; return; }
+    const v = parseNum(ansText); auto = v === null ? null : Math.abs(v - dq.v) < 1e-9;
+    document.getElementById('dauto').textContent = '系统检查答案：' + (auto === null ? '看不懂这个写法，请老师判断' : auto ? '答案正确' : '答案不对') + `（正确值 = ${dq.plain} = ${Number.isInteger(dq.v) ? dq.v : dq.v.toFixed(2)}）· 用了 ${hints} 级提示`;
+    document.getElementById('ddone').hidden = true; document.getElementById('dteach').hidden = false;
+  };
+  const finish = ok => {
+    let img = ''; try { img = dcv.toDataURL('image/jpeg', 0.6); } catch (e) {}
+    logEv({kind: 'draw', gate: gatesOpen + 1, tag: 'Drawing gate', q: dq.plain, answer: ansText, auto, hints, teacher: ok ? '自己画对了' : '还需要帮助', note: document.getElementById('dnote').value.trim(), img});
+    document.getElementById('dmodal').hidden = true;
+    if (ok) rightCount++;
+    message(ok ? '🎨' : '💛', ok ? 'Wonderful drawing! The gate opens.' : 'Good try! You and your teacher opened the gate together.', () => { g.open = true; gatesOpen++; busy = false; hud(); draw(); });
+  };
+  document.getElementById('dok').onclick = () => finish(true);
+  document.getElementById('dhelp').onclick = () => finish(false);
+}
+
+/* ---------- maze ---------- */
+let N, grid, px, py, gx, gy, gates, gatesOpen, feathers, maxFeathers, steps, seen, startTime, rightCount, VIEW, busy = false;
+function buildMaze(n) {
+  // cells: walls[y][x] = {t,r,b,l}
+  const w = Array.from({length: n}, () => Array.from({length: n}, () => ({t: 1, r: 1, b: 1, l: 1})));
+  const vis = Array.from({length: n}, () => Array(n).fill(false));
+  const st = [[0, 0]]; vis[0][0] = true;
+  while (st.length) {
+    const [x, y] = st[st.length - 1];
+    const nb = [[0,-1,'t','b'],[1,0,'r','l'],[0,1,'b','t'],[-1,0,'l','r']]
+      .map(([dx, dy, a, b]) => [x + dx, y + dy, a, b])
+      .filter(([nx, ny]) => nx >= 0 && ny >= 0 && nx < n && ny < n && !vis[ny][nx]);
+    if (!nb.length) { st.pop(); continue; }
+    const [nx, ny, a, b] = pick(nb);
+    w[y][x][a] = 0; w[ny][nx][b] = 0; vis[ny][nx] = true; st.push([nx, ny]);
+  }
+  // perfect maze: only one way home, so every magic gate must be answered
+  return w;
+}
+function solvePath() {
+  const prev = {}, q = [[0, 0]], seenS = new Set(['0,0']);
+  while (q.length) {
+    const [x, y] = q.shift();
+    if (x === gx && y === gy) break;
+    for (const [dx, dy, s] of [[0,-1,'t'],[1,0,'r'],[0,1,'b'],[-1,0,'l']]) {
+      const nx = x + dx, ny = y + dy, k = nx + ',' + ny;
+      if (!grid[y][x][s] && !seenS.has(k)) { seenS.add(k); prev[k] = [x, y]; q.push([nx, ny]); }
+    }
+  }
+  const path = []; let cur = [gx, gy];
+  while (cur) { path.unshift(cur); cur = prev[cur[0] + ',' + cur[1]]; }
+  return path;
+}
+function newGame() {
+  const L = LEVELS[level];
+  N = L.size; VIEW = L.view; maxFeathers = L.feathers;
+  grid = buildMaze(N); gx = N - 1; gy = N - 1;
+  const path = solvePath();
+  gates = [];
+  for (let i = 1; i <= L.gates; i++) {
+    const idx = Math.round(i * (path.length - 1) / (L.gates + 1));
+    gates.push({x: path[idx][0], y: path[idx][1], open: false});
+  }
+  if (gates.length > 1) gates[1].draw = true;
+  resetRun(true);
+  startTime = Date.now(); rightCount = 0;
+  cur = {start: new Date().toISOString(), level: ['Hard', 'Very hard', 'Super hard'][level], events: [], finished: false};
+  LOG.push(cur); saveLog();
+}
+function resetRun(full) {
+  px = 0; py = 0; feathers = maxFeathers; steps = full ? 0 : steps;
+  gates.forEach(g => { g.open = false; g.tries = 0; }); gatesOpen = 0;
+  seen = Array.from({length: N}, () => Array(N).fill(false));
+  reveal(); hud(); draw();
+}
+function reveal() {
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++)
+    if (Math.hypot(x - px, y - py) <= VIEW) seen[y][x] = true;
+}
+function hud() {
+  document.getElementById('feathers').textContent = '🪶'.repeat(feathers) + '·'.repeat(Math.max(0, maxFeathers - feathers));
+  document.getElementById('gates').textContent = `Gates ${gatesOpen} / ${gates.length}`;
+  document.getElementById('steps').textContent = `Steps ${steps}`;
+}
+
+/* ---------- drawing ---------- */
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+let cell = 30;
+function resize() {
+  const w = Math.min(cv.parentElement.clientWidth, 600), dpr = window.devicePixelRatio || 1;
+  cell = w / N; cv.style.height = w + 'px';
+  cv.width = w * dpr; cv.height = w * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); draw();
+}
+function drawParrot(cx, cy, s) {
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(s / 40, s / 40);
+  ctx.strokeStyle = '#8D9893'; ctx.lineWidth = 1.6; ctx.lineJoin = 'round';
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); // crest
+  ctx.moveTo(-6, -12); ctx.lineTo(-11, -27); ctx.lineTo(-2, -15);
+  ctx.lineTo(-1, -29); ctx.lineTo(4, -15); ctx.lineTo(9, -27); ctx.lineTo(7, -12); ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(1, 8, 12, 14, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); // body
+  ctx.beginPath(); ctx.arc(1, -7, 9.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); // head
+  ctx.fillStyle = '#3B3F45'; ctx.beginPath(); ctx.moveTo(8, -6); ctx.quadraticCurveTo(15, -5, 13, 1); ctx.quadraticCurveTo(10, -2, 7, -2); ctx.fill(); // beak
+  ctx.fillStyle = '#22303A'; ctx.beginPath(); ctx.arc(4, -9, 1.8, 0, Math.PI * 2); ctx.fill(); // eye
+  ctx.fillStyle = '#FFD0C6'; ctx.beginPath(); ctx.ellipse(-1, -4, 2.5, 1.6, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+function drawHouse(cx, cy, s) {
+  ctx.save(); ctx.translate(cx, cy);
+  ctx.fillStyle = '#E8603C'; ctx.beginPath(); ctx.moveTo(-s * .42, -s * .02); ctx.lineTo(0, -s * .4); ctx.lineTo(s * .42, -s * .02); ctx.fill();
+  ctx.fillStyle = '#F7D774'; ctx.fillRect(-s * .3, -s * .04, s * .6, s * .38);
+  ctx.fillStyle = '#9C6B3F'; ctx.fillRect(-s * .08, s * .1, s * .16, s * .24);
+  ctx.restore();
+}
+function drawGate(cx, cy, s, isDraw) {
+  ctx.save(); ctx.translate(cx, cy);
+  ctx.fillStyle = isDraw ? '#1D9E75' : '#5B4FC4'; ctx.fillRect(-s * .36, -s * .36, s * .72, s * .72);
+  ctx.fillStyle = '#F2B33D'; ctx.font = `bold ${s * .5}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(isDraw ? '✎' : '?', 0, s * .03);
+  ctx.restore();
+}
+function draw() {
+  if (!grid) return;
+  const W = cell * N;
+  ctx.fillStyle = '#1E2B24'; ctx.fillRect(0, 0, W, W);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    if (!seen[y][x]) continue;
+    const d = Math.hypot(x - px, y - py), lit = d <= VIEW;
+    ctx.fillStyle = lit ? '#F7F3E8' : '#8FA394';
+    ctx.fillRect(x * cell, y * cell, cell + .5, cell + .5);
+  }
+  ctx.strokeStyle = '#2E4636'; ctx.lineWidth = Math.max(2.5, cell * .12); ctx.lineCap = 'round';
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    if (!seen[y][x]) continue;
+    const c = grid[y][x], X = x * cell, Y = y * cell;
+    ctx.beginPath();
+    if (c.t) { ctx.moveTo(X, Y); ctx.lineTo(X + cell, Y); }
+    if (c.r) { ctx.moveTo(X + cell, Y); ctx.lineTo(X + cell, Y + cell); }
+    if (c.b) { ctx.moveTo(X, Y + cell); ctx.lineTo(X + cell, Y + cell); }
+    if (c.l) { ctx.moveTo(X, Y); ctx.lineTo(X, Y + cell); }
+    ctx.stroke();
+  }
+  gates.forEach(g => { if (!g.open && seen[g.y][g.x]) drawGate((g.x + .5) * cell, (g.y + .5) * cell, cell, g.draw); });
+  if (seen[gy][gx]) drawHouse((gx + .5) * cell, (gy + .55) * cell, cell);
+  drawParrot((px + .5) * cell, (py + .55) * cell, cell * .95);
+}
+
+/* ---------- movement ---------- */
+const DIRS = {up: [0, -1, 't'], down: [0, 1, 'b'], left: [-1, 0, 'l'], right: [1, 0, 'r']};
+function move(dir) {
+  if (busy || document.getElementById('game').hidden) return;
+  const [dx, dy, side] = DIRS[dir];
+  if (grid[py][px][side]) return;
+  const nx = px + dx, ny = py + dy;
+  const g = gates.find(g => g.x === nx && g.y === ny && !g.open);
+  if (g) { ask(g); return; }
+  px = nx; py = ny; steps++; reveal(); hud(); draw();
+  if (px === gx && py === gy) win();
+}
+document.addEventListener('keydown', e => {
+  const m = {ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right'}[e.key];
+  if (m) { e.preventDefault(); move(m); }
+});
+document.querySelectorAll('.pad button').forEach(b => {
+  let t; const go = () => move(b.dataset.d);
+  b.addEventListener('pointerdown', e => { e.preventDefault(); go(); t = setInterval(go, 170); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, () => clearInterval(t)));
+});
+let sx, sy;
+cv.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; });
+cv.addEventListener('pointerup', e => {
+  const dx = e.clientX - sx, dy = e.clientY - sy;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return;
+  move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+});
+
+/* ---------- gates ---------- */
+const qmodal = document.getElementById('qmodal');
+function ask(g) {
+  if (g.draw) { askDraw(g); return; }
+  busy = true;
+  g.tries = (g.tries || 0) + 1; const attempt = g.tries;
+  const q = (forceWord || gatesOpen % 2 === 0) ? makeWordQuestion() : makeQuestion(gatesOpen);
+  if (!q.opts) q.opts = uniqueOpts(q.ans, shuffle(q.wrong));
+  document.getElementById('qtag').textContent = `Magic gate ${gatesOpen + 1} · ${q.tag}`;
+  document.getElementById('qtext').innerHTML = q.text;
+  const msg = document.getElementById('qmsg'); msg.textContent = ''; msg.className = 'qmsg';
+  const box = document.getElementById('opts'); box.innerHTML = '';
+  let done = false;
+  q.opts.forEach(o => {
+    const b = document.createElement('button'); b.innerHTML = o;
+    b.onclick = () => {
+      if (done || b.classList.contains('wrong')) return;
+      logEv({kind: q.word ? 'word' : 'math', gate: gatesOpen + 1, attempt, tag: q.tag, word: q.word || '', q: key(q.text), chosen: key(o), answer: key(q.ans), correct: key(o) === key(q.ans)});
+      if (key(o) === key(q.ans)) {
+        done = true; b.classList.add('right'); rightCount++;
+        if (q.word) { const st = vstat[q.word]; st.right++; st.streak++; if (st.streak >= 2) st.mastered = true; saveV(); }
+        msg.textContent = q.word && vstat[q.word].mastered && vstat[q.word].streak === 2 ? `Correct! You mastered “${q.word}”! 📜✨` : 'Correct! The gate opens. ✨'; msg.className = 'qmsg good';
+        setTimeout(() => { qmodal.hidden = true; g.open = true; gatesOpen++; busy = false; hud(); draw(); }, 900);
+      } else {
+        done = true; b.classList.add('wrong'); feathers--; hud();
+        box.querySelectorAll('button').forEach(x => { if (key(x.innerHTML) === key(q.ans)) x.classList.add('right'); });
+        if (q.word) { const st = vstat[q.word]; st.wrong++; st.streak = 0; saveV(); forceWord = q.word; }
+        if (feathers <= 0) {
+          logEv({kind: 'reset', gate: gatesOpen + 1});
+          msg.textContent = 'Oh no! Xiaoxue has no feathers left…'; msg.className = 'qmsg bad';
+          setTimeout(() => { qmodal.hidden = true; message('😵', 'Xiaoxue is too tired. She flies back to the start. All gates are locked again. Try again!', () => { busy = false; resetRun(false); }); }, 1100);
+        } else {
+          msg.innerHTML = (q.word ? `Lost a feather! Remember: <b>${q.explain}</b>` : 'Lost a feather! The green one is right.') + '<br>Next question…'; msg.className = 'qmsg bad';
+          setTimeout(() => { qmodal.hidden = true; ask(g); }, q.word ? 2600 : 2000);
+        }
+      }
+    };
+    box.appendChild(b);
+  });
+  qmodal.hidden = false;
+}
+function message(icon, text, cb) {
+  const m = document.getElementById('mmodal');
+  document.getElementById('mIcon').textContent = icon;
+  document.getElementById('mText').textContent = text;
+  document.getElementById('mBtn').onclick = () => { m.hidden = true; cb && cb(); };
+  m.hidden = false;
+}
+
+/* ---------- screens ---------- */
+function show(id) { ['start', 'game', 'end'].forEach(s => document.getElementById(s).hidden = s !== id); }
+document.getElementById('go').onclick = () => { newGame(); show('game'); resize(); };
+document.getElementById('again').onclick = () => { renderTreasure('treasureStart'); show('start'); };
+renderTreasure('treasureStart');
+window.addEventListener('resize', () => { if (!document.getElementById('game').hidden) resize(); });
+function win() {
+  busy = true;
+  const sec = Math.round((Date.now() - startTime) / 1000);
+  if (cur) { cur.finished = true; cur.sec = sec; cur.steps = steps; saveLog(); }
+  const t = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+  document.getElementById('eTime').textContent = '⏱ ' + t;
+  document.getElementById('eSteps').textContent = '👣 ' + steps + ' steps';
+  document.getElementById('eRight').textContent = '✅ ' + rightCount + ' gates';
+  let best = null;
+  try { best = JSON.parse(localStorage.getItem('xiaoxue-best-' + level) || 'null'); } catch (e) {}
+  if (!best || sec < best) { try { localStorage.setItem('xiaoxue-best-' + level, JSON.stringify(sec)); } catch (e) {} best = sec; }
+  document.getElementById('eBest').textContent = 'Best time on this level: ' + Math.floor(best / 60) + ':' + String(best % 60).padStart(2, '0');
+  renderTreasure('treasureEnd');
+  setTimeout(() => { show('end'); busy = false; }, 400);
+}
+
+/* ---------- teacher log view ---------- */
+const esc = t => String(t).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+function fmt(iso) { const d = new Date(iso); return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
+function summary(s) {
+  const first = s.events.filter(e => (e.kind === 'word' || e.kind === 'math') && e.attempt === 1);
+  const fw = first.filter(e => e.kind === 'word'), fm = first.filter(e => e.kind === 'math');
+  const byTag = {};
+  s.events.filter(e => e.kind === 'math').forEach(e => { const t = byTag[e.tag] = byTag[e.tag] || {n: 0, ok: 0}; t.n++; if (e.correct) t.ok++; });
+  return {fw, fm, byTag, draws: s.events.filter(e => e.kind === 'draw'), resets: s.events.filter(e => e.kind === 'reset').length,
+    wrongWords: [...new Set(s.events.filter(e => e.kind === 'word' && !e.correct).map(e => e.word))]};
+}
+function textLog() {
+  const lines = ['小雪回家 · 老师记录（导出时间 ' + fmt(new Date().toISOString()) + '）', ''];
+  lines.push('单词掌握：' + VOCAB.map(v => `${v.w} ${vstat[v.w].mastered ? '✅' : `${vstat[v.w].right}对/${vstat[v.w].wrong}错`}`).join('，'), '');
+  [...LOG].reverse().forEach(s => {
+    const m = summary(s);
+    lines.push(`【${fmt(s.start)}】${s.level}｜${s.finished ? `到家 ✓ 用时 ${Math.floor(s.sec / 60)}:${String(s.sec % 60).padStart(2, '0')}` : '没有到家'}｜羽毛掉光 ${m.resets} 次`);
+    lines.push(`  单词门第一次答对：${m.fw.filter(e => e.correct).length}/${m.fw.length}　数学门第一次答对：${m.fm.filter(e => e.correct).length}/${m.fm.length}`);
+    if (m.wrongWords.length) lines.push('  答错过的词：' + m.wrongWords.join(', '));
+    Object.entries(m.byTag).forEach(([t, v]) => lines.push(`  数学·${t}：${v.ok}/${v.n} 对`));
+    m.draws.forEach(d => lines.push(`  ✏️ 画画门（${d.q}）：答案 ${d.answer}｜系统 ${d.auto === null ? '?' : d.auto ? '对' : '错'}｜提示 ${d.hints} 级｜老师：${d.teacher}${d.note ? '｜' + d.note : ''}`));
+    lines.push('');
+  });
+  return lines.join('\n');
+}
+function openLog() {
+  const b = document.getElementById('tbody');
+  if (!LOG.length) { b.innerHTML = '<p>还没有记录。玩一局以后再来看。</p>'; }
+  else {
+    let h = '<h3>单词掌握</h3><table><tr><th>词</th><th>状态</th><th>对</th><th>错</th></tr>' +
+      VOCAB.map(v => `<tr><td>${v.w}</td><td>${vstat[v.w].mastered ? '✅ 掌握' : '练习中'}</td><td>${vstat[v.w].right}</td><td>${vstat[v.w].wrong}</td></tr>`).join('') + '</table>';
+    [...LOG].reverse().forEach((s, i) => {
+      const m = summary(s);
+      h += `<h3>${fmt(s.start)} · ${s.level} · ${s.finished ? '到家 ✓' : '没有到家'}</h3>`;
+      h += `<div style="font-size:14px">单词门第一次答对 <b>${m.fw.filter(e => e.correct).length}/${m.fw.length}</b> · 数学门第一次答对 <b>${m.fm.filter(e => e.correct).length}/${m.fm.length}</b> · 羽毛掉光 ${m.resets} 次${m.wrongWords.length ? ' · 答错过的词：' + esc(m.wrongWords.join(', ')) : ''}</div>`;
+      const tags = Object.entries(m.byTag);
+      if (tags.length) h += '<table><tr><th>数学题型</th><th>对 / 总</th></tr>' + tags.map(([t, v]) => `<tr><td>${esc(t)}</td><td>${v.ok} / ${v.n}</td></tr>`).join('') + '</table>';
+      m.draws.forEach((d, k) => {
+        h += `<table><tr><th colspan="2">✏️ 画画门：${esc(d.q)}</th></tr><tr><td style="width:240px">${d.img ? `<img src="${d.img}" alt="她的画"><a download="小雪画画门_${fmt(s.start).replace(/[\/: ]/g, '-')}.jpg" href="${d.img}">下载这张画</a>` : '（图片已省略）'}</td>
+          <td>她的答案：<b>${esc(d.answer)}</b><br>系统检查：${d.auto === null ? '?' : d.auto ? '对' : '错'}<br>用到提示：${d.hints} 级<br>老师判断：<b>${esc(d.teacher)}</b>${d.note ? '<br>备注：' + esc(d.note) : ''}</td></tr></table>`;
+      });
+    });
+    b.innerHTML = h;
+  }
+  document.getElementById('tmsg').textContent = '';
+  document.getElementById('tmodal').hidden = false;
+}
+document.querySelectorAll('[data-tlog]').forEach(b => b.onclick = openLog);
+document.getElementById('tclose').onclick = () => document.getElementById('tmodal').hidden = true;
+document.getElementById('tcopy').onclick = async () => { try { await navigator.clipboard.writeText(textLog()); document.getElementById('tmsg').textContent = '已复制。'; } catch (e) { document.getElementById('tmsg').textContent = '复制不了，请用下载。'; } };
+document.getElementById('tdl').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([textLog()], {type: 'text/plain;charset=utf-8'})); a.download = '小雪回家_老师记录.txt'; a.click(); };
+document.getElementById('tclear').onclick = () => { if (confirm('清空所有游戏记录？（单词掌握进度不会清空）')) { LOG = []; cur = null; saveLog(); openLog(); } };
+</script>
+</body>
+</html>

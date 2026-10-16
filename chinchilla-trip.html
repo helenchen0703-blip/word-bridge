@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Chinchilla's Big Trip</title>
+<style>
+:root{
+  --ink:#3A2F4F; --muted:#7D7391; --card:#FFFDF8; --edge:#F1E4CC; --purple:#7B5CC7; --pink:#F59BB5;
+  --gold:#F2B33D; --teal:#2E9C84; --red:#D9605A; --sky1:#BFD9FF; --sky2:#F7D6EC;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:"Avenir Next","PingFang SC",-apple-system,sans-serif;color:var(--ink);
+  background:linear-gradient(180deg,#9FC2F7 0%,#C9C1F2 45%,#F7D6EC 100%);background-attachment:fixed;overflow-x:hidden}
+.sky{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.star{position:absolute;color:#fff;animation:tw 2.6s ease-in-out infinite;opacity:.8}
+@keyframes tw{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+.cloud{position:absolute;background:#fff;border-radius:999px;opacity:.75;animation:drift linear infinite}
+.cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+.cloud::before{width:55%;height:150%;left:15%;top:-60%}.cloud::after{width:40%;height:120%;right:12%;top:-40%}
+@keyframes drift{from{transform:translateX(-30vw)}to{transform:translateX(130vw)}}
+.wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:16px 14px 40px}
+.book{background:var(--card);border-radius:28px;padding:22px 22px 20px;box-shadow:0 14px 40px rgba(80,50,120,.22),inset 0 0 0 6px var(--edge);position:relative}
+.book::after{content:"";position:absolute;left:18px;right:18px;bottom:-9px;height:12px;background:#EADBC0;border-radius:0 0 22px 22px;z-index:-1}
+h1{font-family:"Baskerville","Georgia","Songti SC",serif;font-size:36px;text-align:center;margin:4px 0 0;color:var(--purple);letter-spacing:.5px}
+.sub{text-align:center;color:var(--muted);font-size:15px;margin-bottom:6px}
+.story{font-family:"Baskerville","Georgia","Songti SC",serif;font-size:21px;line-height:1.6;margin:10px 0}
+.zh{font-family:"PingFang SC","Songti SC",sans-serif;color:var(--muted);font-size:15px}
+button{font:inherit;cursor:pointer;border:none;border-radius:16px;padding:12px 18px;font-weight:700}
+.big{background:var(--purple);color:#fff;font-size:19px;padding:14px 28px;box-shadow:0 6px 0 #5A3FA3}
+.big:active{transform:translateY(3px);box-shadow:0 3px 0 #5A3FA3}
+.center{text-align:center}
+input[type=text]{font:inherit;font-size:20px;padding:12px 14px;border-radius:14px;border:2px solid var(--edge);width:100%;max-width:340px;text-align:center}
+.map{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.7);border-radius:999px;padding:8px 14px;margin-bottom:12px;font-size:20px}
+.map .dot{flex:1;height:4px;margin:0 4px;background:repeating-linear-gradient(90deg,#B9A9E6 0 8px,transparent 8px 14px);border-radius:2px;position:relative}
+.map .done{background:var(--purple)}
+.map span.cur{filter:drop-shadow(0 0 6px #fff);transform:scale(1.25);display:inline-block}
+.hud{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:10px;color:#fff;text-shadow:0 1px 3px rgba(60,30,90,.4)}
+.stars{font-size:22px;letter-spacing:2px}
+.scene{display:flex;gap:14px;align-items:center}
+.scene svg.pic{flex:none;width:170px;height:150px}
+.place{display:inline-block;background:#F3ECFF;color:var(--purple);border-radius:999px;padding:4px 12px;font-weight:700;font-size:14px}
+.bubble{background:#fff;border:2.5px solid #D9CCF2;border-radius:20px;padding:14px 16px;margin:12px 0;font-size:20px;line-height:1.5;position:relative}
+.bubble::before{content:"🗣️ ";}
+.bubble b{color:#C2512A}
+.step{font-weight:800;color:var(--purple);margin:14px 0 8px;font-size:17px}
+.opts{display:grid;gap:10px}
+.opts.two{grid-template-columns:1fr 1fr}
+.opts button{background:#F6F1FF;border:2.5px solid #E2D7F7;color:var(--ink);font-size:18px;text-align:left;padding:13px 15px}
+.opts.two button{text-align:center;font-size:20px}
+.opts button.right{background:#DDF5EA;border-color:var(--teal)}
+.opts button.wrong{background:#FBE4E3;border-color:var(--red);opacity:.6}
+.msg{min-height:28px;margin-top:10px;font-weight:700;text-align:center}
+.msg.good{color:var(--teal)}.msg.bad{color:var(--red)}
+.hint{background:#FFF4DA;border-radius:14px;padding:10px 14px;margin-top:10px;font-size:16px;color:#7A5200}
+.next{margin-top:14px;width:100%}
+canvas{display:block;width:100%;height:290px;background:#fff;border:2.5px dashed #D9CCF2;border-radius:18px;touch-action:none;margin-top:8px}
+.tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tools button{background:#F6F1FF;border:2px solid #E2D7F7;padding:6px 11px;font-size:14px}
+.tools button.sel{border-color:var(--purple);background:#fff}
+.pen{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:-3px}
+.ans{display:flex;gap:8px;align-items:center;margin-top:10px}
+.ans input{text-align:left;max-width:none;flex:1}
+.err{color:var(--red);font-size:14px;min-height:18px;margin-top:4px}
+.teach{background:#FFF6E0;border-radius:16px;padding:12px;margin-top:10px}
+.teach .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.ok{background:var(--teal);color:#fff}.help{background:#fff;border:2px solid var(--gold);color:#7A5200}
+.fade{animation:fade .6s ease}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.hop{animation:hop 1s ease-in-out infinite;transform-box:fill-box;transform-origin:center bottom}
+@keyframes tear{0%{transform:translateY(0);opacity:0}20%{opacity:1}100%{transform:translateY(22px);opacity:0}}
+.tear{animation:tear 1.6s ease-in infinite}
+@keyframes chew{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.6)}}
+.chew{animation:chew .5s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes heartup{0%{transform:translateY(0) scale(.6);opacity:0}30%{opacity:1}100%{transform:translateY(-60px) scale(1.2);opacity:0}}
+.ht{animation:heartup 2s ease-out infinite}
+.tlink{background:none;color:var(--muted);font-weight:400;font-size:13px;text-decoration:underline;padding:6px}
+.modal{position:fixed;inset:0;background:rgba(40,25,60,.5);display:flex;align-items:center;justify-content:center;padding:14px;z-index:20}
+.modal[hidden]{display:none}
+.logcard{background:#fff;border-radius:22px;padding:18px;max-width:740px;width:100%;max-height:88vh;overflow:auto}
+.logcard table{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0 12px}
+.logcard th,.logcard td{border:1px solid #E6DCF5;padding:5px 7px;text-align:left;vertical-align:top}
+.logcard th{background:#F6F1FF}
+.logcard img{max-width:220px;border:1px solid #E6DCF5;border-radius:8px;display:block}
+@media (max-width:560px){.scene{flex-direction:column}.scene svg.pic{width:150px;height:130px}.story{font-size:19px}.bubble{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="sky" id="sky"></div>
+<div class="wrap">
+
+<!-- START -->
+<div class="book center fade" id="start">
+  <svg viewBox="0 0 220 180" width="190" aria-label="the chinchilla"><g class="hop" id="startChin"></g></svg>
+  <h1>The Chinchilla's Big Trip</h1>
+  <div class="sub">龙猫飞北京 · a fairy-tale math journey</div>
+  <p class="story">Once upon a time, a little gray chinchilla lived in Shanghai. He missed his best friend in Beijing so much. One night, he quietly climbed onto an airplane…<br>
+  But the chinchilla can't understand people! Help him solve <b>English math problems</b> to get his ticket, drink, eat, use the toilet, and take a taxi home.</p>
+  <p class="zh">谁在北京的家里等龙猫？写下你的名字：</p>
+  <input type="text" id="nameIn" placeholder="Your name" maxlength="20" aria-label="Your name">
+  <div style="margin-top:16px"><button class="big" id="go">Open the storybook ✨</button></div>
+  <div><button class="tlink" data-tlog>老师记录</button></div>
+</div>
+
+<!-- GAME -->
+<div id="game" hidden>
+  <div class="map" id="map"></div>
+  <div class="hud"><span class="stars" id="stars"></span><span id="pageNo"></span></div>
+  <div class="book fade" id="page"></div>
+</div>
+
+<!-- END -->
+<div class="book center fade" id="end" hidden></div>
+
+</div>
+
+<!-- TEACHER LOG -->
+<div class="modal" id="tmodal" hidden>
+  <div class="logcard">
+    <div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:20px">老师记录</b><button id="tclose" style="background:#F6F1FF">关闭</button></div>
+    <div id="tbody"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+      <button class="ok" id="tcopy">复制文字记录</button>
+      <button id="tdl" style="background:#F6F1FF;color:var(--purple)">下载文字记录（.txt）</button>
+      <button id="tclear" style="background:#fff;border:2px solid var(--red);color:var(--red)">清空记录</button>
+    </div>
+    <div id="tmsg" style="margin-top:6px;font-size:14px;color:var(--teal)"></div>
+  </div>
+</div>
+
+<script>
+/* ---------- fairy-tale sky ---------- */
+(function sky() {
+  const s = document.getElementById('sky');
+  for (let i = 0; i < 26; i++) { const e = document.createElement('div'); e.className = 'star'; e.textContent = Math.random() < .5 ? '✦' : '✧';
+    e.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 60}%;font-size:${8 + Math.random() * 12}px;animation-delay:${Math.random() * 3}s`; s.appendChild(e); }
+  for (let i = 0; i < 5; i++) { const c = document.createElement('div'); c.className = 'cloud'; const w = 90 + Math.random() * 120;
+    c.style.cssText = `width:${w}px;height:${w * .32}px;top:${10 + Math.random() * 75}%;animation-duration:${40 + Math.random() * 40}s;animation-delay:${-Math.random() * 60}s`; s.appendChild(c); }
+})();
+
+/* ---------- chinchilla drawing ---------- */
+function chin(mood) {
+  // mood: happy | think | sleepy | eat | cry-home
+  const eyes = mood === 'sleepy'
+    ? '<path d="M88 78 q8 6 16 0 M128 78 q8 6 16 0" stroke="#2B2433" stroke-width="4" fill="none" stroke-linecap="round"/>'
+    : mood === 'happy' || mood === 'eat'
+    ? '<path d="M88 80 q8 -9 16 0 M128 80 q8 -9 16 0" stroke="#2B2433" stroke-width="4.5" fill="none" stroke-linecap="round"/>'
+    : '<circle cx="96" cy="78" r="9" fill="#2B2433"/><circle cx="136" cy="78" r="9" fill="#2B2433"/><circle cx="99" cy="74" r="3.2" fill="#fff"/><circle cx="139" cy="74" r="3.2" fill="#fff"/>';
+  const mouth = mood === 'eat'
+    ? '<ellipse class="chew" cx="116" cy="104" rx="7" ry="5" fill="#B5606F"/>'
+    : mood === 'think' ? '<path d="M110 104 q6 3 12 0" stroke="#7A5560" stroke-width="3" fill="none" stroke-linecap="round"/>'
+    : '<path d="M108 101 q8 9 16 0" stroke="#7A5560" stroke-width="3" fill="none" stroke-linecap="round"/>';
+  return `
+  <path d="M168 150 q48 -6 40 -48 q-6 -20 -22 -14 q14 10 6 30 q-8 18 -30 18z" fill="#B9B6C2" stroke="#8F8B9C" stroke-width="2"/>
+  <ellipse cx="116" cy="128" rx="62" ry="44" fill="#C9C6D2" stroke="#8F8B9C" stroke-width="2.5"/>
+  <ellipse cx="116" cy="138" rx="34" ry="26" fill="#ECEAF1"/>
+  <ellipse cx="78" cy="38" rx="22" ry="28" fill="#C9C6D2" stroke="#8F8B9C" stroke-width="2.5" transform="rotate(-18 78 38)"/>
+  <ellipse cx="78" cy="40" rx="12" ry="17" fill="#F4B9C8" transform="rotate(-18 78 40)"/>
+  <ellipse cx="154" cy="38" rx="22" ry="28" fill="#C9C6D2" stroke="#8F8B9C" stroke-width="2.5" transform="rotate(18 154 38)"/>
+  <ellipse cx="154" cy="40" rx="12" ry="17" fill="#F4B9C8" transform="rotate(18 154 40)"/>
+  <ellipse cx="116" cy="84" rx="50" ry="42" fill="#CFCCD8" stroke="#8F8B9C" stroke-width="2.5"/>
+  ${eyes}
+  <ellipse cx="82" cy="96" rx="8" ry="5" fill="#F7B8C6" opacity=".8"/><ellipse cx="150" cy="96" rx="8" ry="5" fill="#F7B8C6" opacity=".8"/>
+  <ellipse cx="116" cy="93" rx="5" ry="3.6" fill="#E58EA3"/>
+  ${mouth}
+  <path d="M100 96 l-30 -6 M100 100 l-30 2 M132 96 l30 -6 M132 100 l30 2" stroke="#7E7A8C" stroke-width="1.6" stroke-linecap="round"/>
+  <ellipse cx="92" cy="166" rx="13" ry="7" fill="#B9B6C2"/><ellipse cx="140" cy="166" rx="13" ry="7" fill="#B9B6C2"/>`;
+}
+function chinSVG(mood, w = 170, extra = '') { return `<svg class="pic" viewBox="0 0 220 180" width="${w}" aria-hidden="true">${extra}<g class="hop">${chin(mood)}</g></svg>`; }
+document.getElementById('startChin').innerHTML = chin('happy');
+
+/* ---------- helpers ---------- */
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const uniq = arr => [...new Set(arr.map(String))];
+const esc = t => String(t).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+let NAME = '';
+try { NAME = localStorage.getItem('chin-name') || ''; } catch (e) {}
+document.getElementById('nameIn').value = NAME;
+const who = () => NAME ? NAME : 'his friend';
+const whos = () => NAME ? NAME + '’s' : 'his friend’s';
+function fracTxt(n, d) { return `${n}/${d}`; }
+function parseNum(str) {
+  const s = String(str).trim().replace(/\s+/g, ' '); let m;
+  if ((m = s.match(/^(\d+) (\d+)\/(\d+)$/))) return +m[1] + (+m[2]) / (+m[3]);
+  if ((m = s.match(/^(\d+)\/(\d+)$/))) return (+m[1]) / (+m[2]);
+  if ((m = s.match(/^\d+(\.\d+)?$/))) return +s;
+  return null;
+}
+function mixedTxt(n, d) { const w = Math.floor(n / d), r = n % d; return r ? (w ? `${w} ${r}/${d}` : `${r}/${d}`) : String(w); }
+
+/* ---------- the story pages (numbers change each time) ---------- */
+function buildTrip() {
+  const pages = [];
+  // 1 ticket
+  { const p = pick([640, 680, 720, 760]), have = 600, need = p - have;
+    pages.push({ icon: '🎫', place: 'Shanghai Airport · Ticket desk', pic: '🎫',
+      story: 'At the airport, the chinchilla hops to the ticket desk. He has 4 little bags of coins.',
+      text: `“A ticket to Beijing costs <b>${p} yuan</b>. You have <b>4 bags</b> of coins, and each bag has <b>150 yuan</b>. How much <b>more</b> money do you need?”`,
+      ask: ['How much money he has in all', 'How much more money he needs', 'How much one bag of coins has'], askAns: 1,
+      opts: uniq([need, have, p + have, need + 100]).slice(0, 4), ans: String(need),
+      hint: 'First: 4 × 150 = ? Then: ticket price − the money he has. 先算他一共有多少钱，再算还差多少。',
+      after: `He finds ${need} yuan under a sleepy cat at the airport. Ding! He gets his ticket.` }); }
+  // 2 water (drawing)
+  { const [a, b] = pick([[3, 4], [2, 3], [2, 5], [3, 5]]), k = pick([3, 4, 5]);
+    pages.push({ icon: '🥤', place: 'On the plane · Water', draw: true,
+      story: 'The plane flies up into the clouds. The chinchilla is so thirsty!',
+      text: `“I can give you <b>${a}/${b} cup</b> of water each time. You drink <b>${k} times</b>. How many cups of water do you drink in all?”`,
+      ask: ['How many times he drinks', 'How many cups of water he drinks in all', 'How big one cup is'], askAns: 1,
+      v: k * a / b, plain: `${k} × ${a}/${b} = ${k * a}/${b}`,
+      hint: 'How many groups? How much in each group? Draw the cups! 几组？每组多少？画出来！',
+      after: 'Glug, glug! The chinchilla is not thirsty anymore.' }); }
+  // 3 meal
+  { const [t, d] = pick([[12, 3], [12, 4], [15, 5], [20, 4], [18, 3]]), n = pick(d > 3 ? [1, 3] : [1, 2]), eat = t / d * n;
+    pages.push({ icon: '🍱', place: 'On the plane · Dinner', pic: '🍱',
+      story: 'Dinner time! The flight attendant brings a little box of crackers.',
+      text: `“This box has <b>${t} crackers</b>. You can eat <b>${n}/${d} of</b> them. How many crackers can you eat?”`,
+      ask: ['How many crackers he can eat', 'How many crackers are left', 'How many boxes there are'], askAns: 0,
+      opts: uniq([eat, t - eat, t / d + n, n * d, t + n]).slice(0, 4), ans: String(eat),
+      hint: `“of” means ×. First find 1/${d} of ${t}: ${t} ÷ ${d} = ? Then × ${n}. “of” 就是乘。`,
+      after: 'Crunch, crunch! Yummy crackers in his tummy.' }); }
+  // 4 toilet
+  { const h = pick([10, 11]), m = pick([45, 50, 55]), w = pick([15, 20, 25]);
+    const tot = h * 60 + m + w, ans = `${Math.floor(tot / 60)}:${String(tot % 60).padStart(2, '0')}`;
+    const fake = `${h}:${m + w}`, early = (() => { const x = h * 60 + m - w; return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; })();
+    const off = (() => { const x = tot + 10; return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`; })();
+    pages.push({ icon: '🚻', place: 'On the plane · Toilet', pic: '🚻',
+      story: 'Oh no! The chinchilla needs the toilet, but someone is inside.',
+      text: `“The toilet is busy. Please wait <b>${w} minutes</b>. The clock says <b>${h}:${m}</b> now. What time can you use the toilet?”`,
+      ask: ['How long he must wait', 'What time he can use the toilet', 'How many people are waiting'], askAns: 1,
+      opts: uniq([ans, fake, early, off]).slice(0, 4), ans,
+      hint: `60 minutes make 1 hour! ${m} + ${w} = ${m + w} minutes → 1 hour and ${m + w - 60} minutes. 60 分钟 = 1 小时。`,
+      after: 'Phew! The chinchilla feels much better.' }); }
+  // 5 taxi
+  { const r = pick([2, 3]), km = pick([12, 15, 20, 25]), cost = 13 + r * km;
+    pages.push({ icon: '🚕', place: 'Beijing · Taxi', pic: '🚕',
+      story: 'The plane lands in Beijing! The chinchilla jumps into a taxi.',
+      text: `“The taxi costs <b>13 yuan</b> to start, and <b>${r} yuan</b> for each kilometer. ${whos()} home is <b>${km} kilometers</b> away. How much is the taxi ride?”`,
+      ask: ['How far the home is', 'How much the whole taxi ride costs', 'How much one kilometer costs'], askAns: 1,
+      opts: uniq([cost, r * km, 13 * km, 13 + r + km]).slice(0, 4), ans: String(cost),
+      hint: `First: ${r} × ${km} = ? Then add the 13 yuan to start. 先算公里的钱，再加起步价。`,
+      after: 'Beep beep! The taxi stops at a little house with a warm, yellow light.' }); }
+  return pages.map(p => ({...p, opts: p.opts ? shuffle(p.opts.map(String)) : null}));
+}
+
+/* ---------- teacher log ---------- */
+const LKEY = 'chin-trip-log-v1';
+let LOG = []; try { LOG = JSON.parse(localStorage.getItem(LKEY) || '[]') || []; } catch (e) { LOG = []; }
+let cur = null;
+function saveLog() {
+  LOG.forEach((s, i) => { if (i < LOG.length - 12) s.events.forEach(e => { if (e.img) e.img = ''; }); });
+  if (LOG.length > 40) LOG = LOG.slice(-40);
+  try { localStorage.setItem(LKEY, JSON.stringify(LOG)); } catch (e) { LOG.forEach(s => s.events.forEach(ev => { if (ev.img && s !== cur) ev.img = ''; })); try { localStorage.setItem(LKEY, JSON.stringify(LOG)); } catch (e2) {} }
+}
+function logEv(ev) { if (!cur) return; ev.t = new Date().toISOString(); cur.events.push(ev); saveLog(); }
+
+/* ---------- game state ---------- */
+const MAXSTARS = 5;
+let trip, pageI, stars;
+const $ = id => document.getElementById(id);
+function show(id) { ['start', 'game', 'end'].forEach(s => $(s).hidden = s !== id); window.scrollTo(0, 0); }
+function renderMap() {
+  const icons = ['🏙️', ...trip.map(p => p.icon), '🏠'];
+  $('map').innerHTML = icons.map((ic, i) => (i ? `<div class="dot ${i <= pageI ? 'done' : ''}"></div>` : '') + `<span class="${i === pageI + 1 ? 'cur' : ''}">${ic}</span>`).join('');
+  $('stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(MAXSTARS - stars);
+  $('pageNo').textContent = `Page ${pageI + 1} / ${trip.length}`;
+}
+function loseStar(where) {
+  stars--; renderMap();
+  if (stars > 0) return false;
+  logEv({kind: 'nap', page: pageI + 1, where});
+  setTimeout(() => {
+    $('page').innerHTML = `<div class="center">${chinSVG('sleepy', 190)}<p class="story">Oh no… the chinchilla is out of stars and very sleepy. He falls asleep and dreams… and wakes up back in Shanghai!</p>
+      <p class="zh">星星用完了，龙猫睡着了……醒来时又回到了上海！</p><button class="big next" id="restart">Try the trip again ↻</button></div>`;
+    $('restart').onclick = () => startTrip(false);
+  }, 900);
+  return true;
+}
+function startTrip(fresh) {
+  trip = buildTrip(); pageI = 0; stars = MAXSTARS;
+  if (fresh || !cur) { cur = {start: new Date().toISOString(), name: NAME ? '（已填写名字）' : '', events: [], finished: false}; LOG.push(cur); saveLog(); }
+  else logEv({kind: 'restart'});
+  show('game'); renderPage();
+}
+function renderPage() {
+  renderMap();
+  const p = trip[pageI], pg = $('page');
+  pg.classList.remove('fade'); void pg.offsetWidth; pg.classList.add('fade');
+  pg.innerHTML = `
+    <span class="place">${p.icon} ${p.place}</span>
+    <div class="scene">${chinSVG('think', 160)}<p class="story">${p.story}</p></div>
+    <div class="bubble">${p.text}</div>
+    <div class="step">Step 1 · What does the question want to find? <span class="zh">这道题要求什么？</span></div>
+    <div class="opts" id="askOpts"></div>
+    <div id="step2"></div>
+    <div class="msg" id="msg"></div>`;
+  let tries = 0;
+  const box = $('askOpts');
+  p.ask.forEach((txt, i) => {
+    const b = document.createElement('button'); b.textContent = txt;
+    b.onclick = () => {
+      if (b.classList.contains('wrong') || box.dataset.done) return;
+      tries++; const ok = i === p.askAns;
+      logEv({kind: 'ask', page: pageI + 1, place: p.place, attempt: tries, chosen: txt, answer: p.ask[p.askAns], correct: ok});
+      if (ok) { b.classList.add('right'); box.dataset.done = '1'; $('msg').textContent = 'Yes! Now solve it.'; $('msg').className = 'msg good'; step2(p); }
+      else { b.classList.add('wrong'); $('msg').textContent = 'Not quite. Read what the person says again. You lost a star.'; $('msg').className = 'msg bad'; loseStar('ask'); }
+    };
+    box.appendChild(b);
+  });
+}
+function step2(p) {
+  const s2 = $('step2');
+  if (p.draw) return drawStep(p, s2);
+  s2.innerHTML = `<div class="step">Step 2 · Solve it! <span class="zh">解一解</span></div><div class="opts two" id="solveOpts"></div><div id="hintBox"></div>`;
+  let tries = 0; const box = $('solveOpts');
+  p.opts.forEach(o => {
+    const b = document.createElement('button'); b.textContent = o + (p.place.includes('Toilet') ? '' : '');
+    b.onclick = () => {
+      if (b.classList.contains('wrong') || box.dataset.done) return;
+      tries++; const ok = o === p.ans;
+      logEv({kind: 'solve', page: pageI + 1, place: p.place, attempt: tries, chosen: o, answer: p.ans, correct: ok});
+      if (ok) { b.classList.add('right'); box.dataset.done = '1'; success(p); }
+      else {
+        b.classList.add('wrong'); $('msg').textContent = 'Hmm, not this one. You lost a star. Here is a hint!'; $('msg').className = 'msg bad';
+        $('hintBox').innerHTML = `<div class="hint">💡 ${p.hint}</div>`;
+        loseStar('solve');
+      }
+    };
+    box.appendChild(b);
+  });
+}
+function success(p) {
+  $('msg').textContent = '';
+  const s = document.createElement('div');
+  s.innerHTML = `<div class="hint" style="background:#E6F7EF;color:#1E6B56">✨ ${p.after}</div><button class="big next" id="nextBtn">${pageI + 1 < trip.length ? 'Turn the page →' : 'Open the door 🏠'}</button>`;
+  $('page').appendChild(s);
+  $('nextBtn').onclick = () => { pageI++; if (pageI < trip.length) renderPage(); else finish(); };
+}
+
+/* ---------- drawing step ---------- */
+function drawStep(p, s2) {
+  s2.innerHTML = `<div class="step">Step 2 · Draw it yourself, then write the answer! <span class="zh">自己画出来，再写答案</span></div>
+    <canvas id="dcv"></canvas><div class="tools" id="dtools"></div>
+    <div style="margin-top:8px"><button class="help" id="dhint" style="padding:6px 12px;font-size:14px">I need a hint</button></div><div id="dhints"></div>
+    <div class="ans"><b>My answer:</b><input type="text" id="dans" placeholder="e.g. 9/4 or 2 1/4" aria-label="My answer"></div>
+    <div class="err" id="derr"></div>
+    <button class="big next" id="ddone">I'm done! Show my teacher ✅</button>
+    <div class="teach" id="dteach" hidden>
+      <b style="color:#7A5200">老师判断</b>（她自己画出“几组 × 每组多少”了吗？）
+      <div style="font-size:14px;margin-top:4px" id="dauto"></div>
+      <input type="text" id="dnote" placeholder="备注：她怎么画的、说了什么（可不填）" style="max-width:none;text-align:left;font-size:15px;margin-top:8px">
+      <div class="row"><button class="ok" id="dok">✓ 自己画对了</button><button class="help" id="dhelp">还需要帮助（记录后继续）</button></div>
+    </div>`;
+  const cv = $('dcv'), ctx = cv.getContext('2d'); let strokes = [], color = '#3A2F4F', erase = false, down = false, hints = 0;
+  const redraw = () => { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+    strokes.forEach(s => { ctx.beginPath(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = s.e ? '#fff' : s.c; ctx.lineWidth = s.e ? 22 : 3.5; s.p.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.stroke(); }); };
+  const resize = () => { const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1; cv.width = r.width * d; cv.height = r.height * d; ctx.setTransform(d, 0, 0, d, 0, 0); redraw(); };
+  const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  cv.addEventListener('pointerdown', e => { down = true; cv.setPointerCapture(e.pointerId); strokes.push({c: color, e: erase, p: [pos(e)]}); });
+  cv.addEventListener('pointermove', e => { if (down) { strokes[strokes.length - 1].p.push(pos(e)); redraw(); } });
+  ['pointerup', 'pointercancel'].forEach(ev => cv.addEventListener(ev, () => down = false));
+  const t = $('dtools');
+  ['#3A2F4F', '#4E9BE0', '#F08AA6', '#2E9C84'].forEach((c, i) => { const b = document.createElement('button'); b.innerHTML = `<span class="pen" style="background:${c}"></span>`; b.setAttribute('aria-label', 'pen'); if (!i) b.classList.add('sel');
+    b.onclick = () => { color = c; erase = false; t.querySelectorAll('button').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); }; t.appendChild(b); });
+  [['Eraser', () => { erase = true; }], ['Undo', () => { strokes.pop(); redraw(); }], ['Clear', () => { strokes = []; redraw(); }]].forEach(([n, f]) => { const b = document.createElement('button'); b.textContent = n; b.onclick = () => { f(); if (n === 'Eraser') { t.querySelectorAll('button').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); } }; t.appendChild(b); });
+  resize();
+  const HINTS = ['How many groups? How much in each group? 几组？每组多少？', 'Remember Jars of Slime: 5 jars, 3/4 cup in each. Draw the cups the same way! 想想 Jars of Slime。', 'Ask your teacher to draw the first cup. Then you draw the rest. 请老师画第一杯，你画剩下的。'];
+  $('dhint').onclick = () => { if (hints < 3) { hints++; $('dhints').innerHTML = HINTS.slice(0, hints).map(h => `<div class="hint">💡 ${h}</div>`).join(''); } };
+  $('dans').oninput = () => $('derr').textContent = '';
+  let auto = null, ansText = '';
+  $('ddone').onclick = () => {
+    ansText = $('dans').value.trim();
+    if (!strokes.length) { $('derr').textContent = 'Draw it first!'; return; }
+    if (!ansText) { $('derr').textContent = 'Write your answer first.'; return; }
+    const v = parseNum(ansText); auto = v === null ? null : Math.abs(v - p.v) < 1e-9;
+    $('dauto').textContent = '系统检查答案：' + (auto === null ? '看不懂这个写法，请老师判断' : auto ? '答案正确' : '答案不对') + `（正确：${p.plain}）· 用了 ${hints} 级提示`;
+    $('ddone').hidden = true; $('dteach').hidden = false;
+  };
+  const done = ok => {
+    let img = ''; try { img = cv.toDataURL('image/jpeg', .6); } catch (e) {}
+    logEv({kind: 'draw', page: pageI + 1, place: p.place, q: p.plain, answer: ansText, auto, hints, teacher: ok ? '自己画对了' : '还需要帮助', note: $('dnote').value.trim(), img});
+    $('dteach').hidden = true;
+    if (!ok) p.after = 'You and your teacher worked it out together. ' + p.after;
+    success(p);
+  };
+  $('dok').onclick = () => done(true); $('dhelp').onclick = () => done(false);
+}
+
+/* ---------- ending ---------- */
+function finish() {
+  if (cur) { cur.finished = true; cur.stars = stars; saveLog(); }
+  const e = $('end');
+  e.innerHTML = `
+    <h1>Home at last!</h1><div class="sub">龙猫终于到家了</div>
+    <svg viewBox="0 0 420 300" style="width:100%;max-width:440px" aria-label="the friend hugs the chinchilla and gives him dried apple slices">
+      <rect width="420" height="300" rx="24" fill="#FFF2DE"/>
+      <rect x="0" y="232" width="420" height="68" fill="#EED6B4"/>
+      <rect x="28" y="34" width="96" height="74" rx="8" fill="#CFE2FF" stroke="#C9A06B" stroke-width="5"/><text x="56" y="80" font-size="22">🌙</text>
+      <circle cx="300" cy="96" r="36" fill="#F8D7BE"/>
+      <path d="M262 92 q2 -48 38 -46 q38 0 40 46 q-12 -22 -40 -22 q-26 0 -38 22z" fill="#4A3426"/>
+      <path d="M286 98 q6 -5 12 0 M308 98 q6 -5 12 0" stroke="#4A3426" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <ellipse class="tear" cx="288" cy="108" rx="3" ry="5" fill="#7FC4F2"/><ellipse class="tear" style="animation-delay:.8s" cx="320" cy="108" rx="3" ry="5" fill="#7FC4F2"/>
+      <path d="M294 118 q10 6 20 0" stroke="#C0504D" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M244 232 q0 -96 56 -104 q56 8 56 104z" fill="#F59BB5"/>
+      <path d="M262 168 q-36 10 -52 30" stroke="#F59BB5" stroke-width="20" stroke-linecap="round" fill="none"/>
+      <g transform="translate(196 200)"><ellipse cx="0" cy="0" rx="13" ry="9" fill="#F7C9A1" stroke="#D9A070" stroke-width="2"/><ellipse cx="0" cy="0" rx="5" ry="3" fill="#FFF0D8"/></g>
+      <g transform="translate(70 120) scale(.72)"><g class="hop">${chin('eat')}</g></g>
+      <g transform="translate(150 230)"><ellipse rx="40" ry="9" fill="#C68B59"/>
+        <g fill="#F7C9A1" stroke="#D9A070" stroke-width="1.5"><ellipse cx="-18" cy="-4" rx="9" ry="6"/><ellipse cx="0" cy="-7" rx="9" ry="6"/><ellipse cx="18" cy="-4" rx="9" ry="6"/></g></g>
+      <g font-size="24"><text class="ht" x="150" y="110">💗</text><text class="ht" style="animation-delay:.7s" x="190" y="90">💖</text><text class="ht" style="animation-delay:1.4s" x="225" y="118">💗</text></g>
+    </svg>
+    <p class="story">The door opens. <b>${esc(who())}</b> sees the little chinchilla and starts to cry. “I missed you for so, so long!”<br>
+    Then ${esc(who())} gives him a bowl of <b>dried apple slices</b>. Crunch, crunch! The chinchilla is the happiest chinchilla in the whole world.</p>
+    <p class="zh">${esc(NAME || '朋友')}看到龙猫，哭了：“我想你想了好久好久！”然后喂它吃苹果干。龙猫开心极了。</p>
+    <p style="font-weight:700">⭐ Stars left: ${stars} / ${MAXSTARS}</p>
+    <button class="big" id="again">Take another trip ✈️</button>
+    <div><button class="tlink" data-tlog>老师记录</button></div>`;
+  $('again').onclick = () => show('start');
+  e.querySelector('[data-tlog]').onclick = openLog;
+  show('end');
+}
+
+/* ---------- start ---------- */
+$('go').onclick = () => {
+  NAME = $('nameIn').value.trim();
+  try { localStorage.setItem('chin-name', NAME); } catch (e) {}
+  startTrip(true);
+};
+
+/* ---------- teacher log view ---------- */
+function fmt(iso) { const d = new Date(iso); return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
+function pageStats(s) {
+  const rows = {};
+  s.events.forEach(e => {
+    if (!e.place) return;
+    const r = rows[e.place] = rows[e.place] || {ask: '', askTries: 0, solve: '', solveTries: 0, draw: null};
+    if (e.kind === 'ask') { r.askTries++; if (e.attempt === 1) r.ask = e.correct ? '✓' : '✗（选了：' + e.chosen + '）'; }
+    if (e.kind === 'solve') { r.solveTries++; if (e.attempt === 1) r.solve = e.correct ? '✓' : '✗（选了 ' + e.chosen + '）'; }
+    if (e.kind === 'draw') r.draw = e;
+  });
+  return rows;
+}
+function textLog() {
+  const L = ['龙猫飞北京 · 老师记录（导出 ' + fmt(new Date().toISOString()) + '）', '说明：Step 1 = 读懂题意（题目要求什么）；Step 2 = 解题。只记第一次的选择。', ''];
+  [...LOG].reverse().forEach(s => {
+    const naps = s.events.filter(e => e.kind === 'nap').length;
+    L.push(`【${fmt(s.start)}】${s.finished ? `到家 ✓ 剩 ${s.stars} 颗星` : '没有到家'}｜星星用完 ${naps} 次`);
+    Object.entries(pageStats(s)).forEach(([pl, r]) => {
+      if (r.draw) L.push(`  ${pl}｜读懂题意 ${r.ask || '—'}（试了 ${r.askTries} 次）｜画画：答案 ${r.draw.answer}，系统 ${r.draw.auto === null ? '?' : r.draw.auto ? '对' : '错'}，提示 ${r.draw.hints} 级，老师：${r.draw.teacher}${r.draw.note ? '，' + r.draw.note : ''}`);
+      else L.push(`  ${pl}｜读懂题意 ${r.ask || '—'}（试了 ${r.askTries} 次）｜解题 ${r.solve || '—'}（试了 ${r.solveTries} 次）`);
+    });
+    L.push('');
+  });
+  return L.join('\n');
+}
+function openLog() {
+  const b = $('tbody');
+  if (!LOG.length) b.innerHTML = '<p>还没有记录。玩一次以后再来看。</p>';
+  else {
+    let h = '<p style="font-size:14px;color:#7D7391">Step 1 = 读懂题意（题目要求什么）；Step 2 = 解题。“第一次”= 第一次就选对。</p>';
+    [...LOG].reverse().forEach(s => {
+      const naps = s.events.filter(e => e.kind === 'nap').length;
+      h += `<h3 style="margin:12px 0 4px">${fmt(s.start)} · ${s.finished ? '到家 ✓（剩 ' + s.stars + ' 颗星）' : '没有到家'} · 星星用完 ${naps} 次</h3>`;
+      h += '<table><tr><th>关卡</th><th>Step 1 读懂题意（第一次）</th><th>Step 2 解题（第一次）</th></tr>';
+      Object.entries(pageStats(s)).forEach(([pl, r]) => {
+        const st2 = r.draw ? `${r.draw.img ? `<img src="${r.draw.img}" alt="她的画"><a download="龙猫画画_${fmt(s.start).replace(/[\/: ]/g, '-')}.jpg" href="${r.draw.img}">下载这张画</a>` : ''}答案 <b>${esc(r.draw.answer)}</b>｜系统 ${r.draw.auto === null ? '?' : r.draw.auto ? '对' : '错'}｜提示 ${r.draw.hints} 级｜老师：<b>${esc(r.draw.teacher)}</b>${r.draw.note ? '｜' + esc(r.draw.note) : ''}` : `${esc(r.solve || '—')}（试了 ${r.solveTries} 次）`;
+        h += `<tr><td>${esc(pl)}</td><td>${esc(r.ask || '—')}（试了 ${r.askTries} 次）</td><td>${st2}</td></tr>`;
+      });
+      h += '</table>';
+    });
+    b.innerHTML = h;
+  }
+  $('tmsg').textContent = ''; $('tmodal').hidden = false;
+}
+document.querySelectorAll('[data-tlog]').forEach(b => b.onclick = openLog);
+$('tclose').onclick = () => $('tmodal').hidden = true;
+$('tcopy').onclick = async () => { try { await navigator.clipboard.writeText(textLog()); $('tmsg').textContent = '已复制。'; } catch (e) { $('tmsg').textContent = '复制不了，请用下载。'; } };
+$('tdl').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([textLog()], {type: 'text/plain;charset=utf-8'})); a.download = '龙猫飞北京_老师记录.txt'; a.click(); };
+$('tclear').onclick = () => { if (confirm('清空所有游戏记录？')) { LOG = []; cur = null; saveLog(); openLog(); } };
+</script>
+</body>
+</html>
