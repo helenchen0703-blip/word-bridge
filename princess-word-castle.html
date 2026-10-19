@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Princess Word Castle</title>
+<style>
+:root{--ink:#4A2B4F;--muted:#8E7393;--pink:#E5579A;--pink2:#F7B6D2;--lav:#B79CF0;--gold:#F2B33D;--teal:#2E9C84;--red:#D9605A;--card:#FFFBFD}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{font-family:"Avenir Next","PingFang SC",-apple-system,sans-serif;color:var(--ink);min-height:100vh;
+  background:radial-gradient(circle at 20% 10%,#FFE3F1 0,transparent 40%),radial-gradient(circle at 80% 0,#E9DDFF 0,transparent 45%),linear-gradient(180deg,#FFEAF4,#F1E8FF);background-attachment:fixed}
+.wrap{max-width:900px;margin:0 auto;padding:14px 14px 40px}
+h1{font-family:"Baskerville","Georgia",serif;color:var(--pink);font-size:38px;margin:4px 0 0;text-align:center}
+.sub{text-align:center;color:var(--muted);font-size:15px}
+.card{background:var(--card);border-radius:26px;padding:18px;box-shadow:0 12px 34px rgba(150,60,120,.16);border:3px solid #FFD6EA}
+.layout{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
+@media (max-width:720px){.layout{grid-template-columns:1fr}.stage svg{max-width:240px}}
+.stage{text-align:center}
+.stage svg{width:100%;max-width:300px}
+.items{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.items span{font-size:12px;border-radius:12px;padding:5px 4px;background:#F6EDF8;color:#B39BB8;text-align:center}
+.items span.on{background:#FFE1EF;color:var(--pink);font-weight:700}
+button{font:inherit;cursor:pointer;border:none;border-radius:16px;padding:12px 18px;font-weight:700}
+.big{background:var(--pink);color:#fff;font-size:19px;padding:14px 28px;box-shadow:0 5px 0 #B83E78}
+.big:active{transform:translateY(3px);box-shadow:0 2px 0 #B83E78}
+input[type=text]{font:inherit;font-size:20px;padding:12px;border-radius:14px;border:2px solid #FFD0E6;text-align:center;width:100%;max-width:320px}
+.center{text-align:center}
+.progress{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:6px 0 12px}
+.progress span{font-size:13px;padding:4px 10px;border-radius:999px;background:#F3ECFA;color:#8E7393;font-weight:700}
+.progress span.m{background:#DDF5EA;color:#1E6B56}
+.progress span.half{background:#FFF1D6;color:#8A5A00}
+.tag{display:inline-block;background:#FFE1EF;color:var(--pink);border-radius:999px;padding:3px 12px;font-weight:700;font-size:13px}
+.word{font-family:"Baskerville","Georgia",serif;font-size:42px;color:var(--pink);text-align:center;margin:8px 0 2px}
+.sent{font-size:20px;line-height:1.55;background:#fff;border:2px dashed #F2C6DD;border-radius:18px;padding:12px 14px;margin:10px 0}
+.sent b{color:var(--pink)}
+.hintline{color:var(--muted);font-size:14px;text-align:center;margin-bottom:8px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts button{background:#FFF4FA;border:2.5px solid #F6CFE2;color:var(--ink);font-size:18px;padding:13px 8px}
+.opts button.right{background:#DDF5EA;border-color:var(--teal)}
+.opts button.wrong{background:#FBE4E3;border-color:var(--red);opacity:.6}
+.msg{min-height:30px;text-align:center;font-weight:700;margin-top:10px}
+.msg.good{color:var(--teal)}.msg.bad{color:var(--red)}
+.family{font-size:14px;background:#F3ECFA;border-radius:12px;padding:8px 12px;margin-top:8px;color:#6A4D7F}
+.next{margin-top:12px;width:100%}
+@keyframes sparkle{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+.spk{animation:sparkle 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .6s ease-out both;transform-box:fill-box;transform-origin:center}
+@keyframes twirl{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.twirl{animation:twirl 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center bottom}
+.tlink{background:none;color:var(--muted);font-weight:400;font-size:13px;text-decoration:underline;padding:6px}
+.modal{position:fixed;inset:0;background:rgba(60,20,60,.45);display:flex;align-items:center;justify-content:center;padding:14px;z-index:20}
+.modal[hidden]{display:none}
+.logcard{background:#fff;border-radius:22px;padding:18px;max-width:680px;width:100%;max-height:88vh;overflow:auto}
+.logcard table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+.logcard th,.logcard td{border:1px solid #F0DCE8;padding:5px 7px;text-align:left}
+.logcard th{background:#FFF0F7}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- START -->
+<div id="start" class="card center">
+  <h1>Princess Word Castle</h1>
+  <div class="sub">公主单词城堡 · 学会单词，为舞会打扮公主</div>
+  <svg viewBox="0 0 300 330" width="210" id="startDoll" aria-label="the princess"></svg>
+  <p style="font-size:18px;line-height:1.6;max-width:560px;margin:6px auto">Tonight there is a royal ball at the castle! The princess needs your help to get ready.<br>Every time you <b>learn a word</b>, she gets something beautiful to wear. Learn all 9 words to send her to the ball! ✨</p>
+  <p class="sub">给公主起个名字吧：</p>
+  <input type="text" id="nameIn" placeholder="Princess name" maxlength="20" aria-label="Princess name">
+  <div style="margin-top:14px"><button class="big" id="go">Enter the castle 🏰</button></div>
+  <div><button class="tlink" data-tlog>老师记录</button></div>
+</div>
+
+<!-- GAME -->
+<div id="game" class="layout" hidden>
+  <div class="card stage">
+    <svg viewBox="0 0 300 330" id="doll" aria-label="the princess getting ready"></svg>
+    <div class="items" id="items"></div>
+  </div>
+  <div class="card">
+    <div class="progress" id="progress"></div>
+    <div id="round"></div>
+  </div>
+</div>
+
+<!-- END -->
+<div id="end" class="card center" hidden></div>
+</div>
+
+<div class="modal" id="tmodal" hidden>
+  <div class="logcard">
+    <div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:20px">老师记录</b><button id="tclose" style="background:#F3ECFA">关闭</button></div>
+    <div id="tbody"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+      <button id="tcopy" style="background:var(--teal);color:#fff">复制文字记录</button>
+      <button id="tdl" style="background:#F3ECFA;color:var(--pink)">下载（.txt）</button>
+      <button id="treset" style="background:#fff;border:2px solid var(--red);color:var(--red)">清空进度和记录</button>
+    </div>
+    <div id="tmsg" style="font-size:14px;color:var(--teal);margin-top:6px"></div>
+  </div>
+</div>
+
+<script>
+/* ---------- words (from class, 10/19) ---------- */
+const WORDS = [
+  {w:'suffering', m:'痛苦；受苦', s:'The little bird was <b>suffering</b> in the cold rain, so the princess took it inside.', b:'The little bird was ____ in the cold rain, so the princess took it inside.', fam:'suffer（受苦）→ suffering（正在受苦 / 痛苦）'},
+  {w:'trick', m:'诡计；骗人的把戏', s:'The fox played a <b>trick</b> on the princess, but she was too clever for him.', b:'The fox played a ____ on the princess, but she was too clever for him.', fam:'It was all a trick! = 这全是一个骗局！'},
+  {w:'full', m:'满的；充满', s:'The ballroom was <b>full</b> of flowers and music.', b:'The ballroom was ____ of flowers and music.', fam:'full of … = 充满……；empty（空的）是它的反义词'},
+  {w:'stealing', m:'偷（正在偷 / 偷东西这件事）', s:'A naughty cat was <b>stealing</b> cookies from the castle kitchen.', b:'A naughty cat was ____ cookies from the castle kitchen.', fam:'steal（偷，上周学过）→ stealing → stole'},
+  {w:'blame', m:'责怪；怪罪', s:'Don’t <b>blame</b> the puppy. The wind broke the vase!', b:'Don’t ____ the puppy. The wind broke the vase!', fam:'I’m to blame = 是我的错 / 要怪我'},
+  {w:'was fashioned by', m:'被……打造 / 塑造出来', s:'The crystal crown <b>was fashioned by</b> a fairy.', b:'The crystal crown ____ a fairy.', fam:'fashion（打造、塑造）——这里不是“时尚”的意思！'},
+  {w:'punish', m:'惩罚', s:'The queen did not <b>punish</b> the boy. She gave him a second chance.', b:'The queen did not ____ the boy. She gave him a second chance.', fam:'punish → punished（上周学过）→ punishment（惩罚，名词）'},
+  {w:'humankind', m:'人类（所有的人）', s:'The good fairy wanted to help all <b>humankind</b>, not only the princess.', b:'The good fairy wanted to help all ____, not only the princess.', fam:'human（人）+ kind（种类）= humankind 人类'},
+  {w:'decided', m:'决定了', s:'The princess <b>decided</b> to wear her pink dress to the ball.', b:'The princess ____ to wear her pink dress to the ball.', fam:'decide（决定）→ decided（决定了，过去式）'}
+];
+const ITEMS = [['crown','👑 Crown'],['earrings','💎 Earrings'],['necklace','📿 Necklace'],['gown','👗 Ball gown'],['shoes','👠 Glass shoes'],['wand','🪄 Magic wand'],['bag','👜 Little bag'],['puppy','🐶 Puppy friend'],['lights','✨ Castle lights']];
+
+/* ---------- storage ---------- */
+const SKEY = 'princess-words-v1';
+let ST = {name: '', stat: {}, log: []};
+try { ST = Object.assign(ST, JSON.parse(localStorage.getItem(SKEY) || '{}')); } catch (e) {}
+WORDS.forEach(x => { ST.stat[x.w] = ST.stat[x.w] || {streak: 0, right: 0, wrong: 0, mastered: false, firstTry: null}; });
+function save() { try { localStorage.setItem(SKEY, JSON.stringify(ST)); } catch (e) {} }
+const $ = id => document.getElementById(id);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const esc = t => String(t).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+const who = () => ST.name || 'the princess';
+const Who = () => ST.name || 'The princess';
+
+/* ---------- princess drawing (generic fashion-doll princess) ---------- */
+function unlocked() { return WORDS.filter(x => ST.stat[x.w].mastered).length; }
+function dollSVG(n, party) {
+  const has = k => party || ITEMS.findIndex(i => i[0] === k) < n;
+  const gown = has('gown');
+  return `
+  ${has('lights') ? '<g><rect width="300" height="330" rx="24" fill="#2E2150"/><g fill="#FFE59A"><circle class="spk" cx="40" cy="40" r="4"/><circle class="spk" style="animation-delay:.4s" cx="260" cy="60" r="5"/><circle class="spk" style="animation-delay:.8s" cx="70" cy="120" r="3"/><circle class="spk" style="animation-delay:1.2s" cx="240" cy="150" r="4"/><circle class="spk" style="animation-delay:.6s" cx="150" cy="24" r="3"/></g></g>' : '<rect width="300" height="330" rx="24" fill="#FFF4FA"/>'}
+  <g class="twirl">
+    <path d="M150 52 c-34 0 -50 26 -50 58 c0 34 6 66 -6 96 c18 6 34 -6 40 -28 l32 0 c6 22 22 34 40 28 c-12 -30 -6 -62 -6 -96 c0 -32 -16 -58 -50 -58z" fill="#F6CF6A"/>
+    ${gown
+      ? '<path class="pop" d="M120 150 h60 l8 40 c26 30 44 70 50 120 h-176 c6 -50 24 -90 50 -120z" fill="#F07BB4"/><path d="M128 190 h44 l-4 -38 h-36z" fill="#E5579A"/><path d="M80 300 q70 -18 140 0" stroke="#FFD1E6" stroke-width="5" fill="none"/>'
+      : '<path d="M124 150 h52 l6 70 h-64z" fill="#C9B6E8"/><rect x="122" y="218" width="56" height="70" rx="10" fill="#9C8BD0"/>'}
+    <rect x="128" y="118" width="44" height="34" rx="14" fill="#F8D7C4"/>
+    <path d="M118 158 q-22 30 -14 70" stroke="#F8D7C4" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <path d="M182 158 q22 30 14 70" stroke="#F8D7C4" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <ellipse cx="150" cy="96" rx="32" ry="36" fill="#F8D7C4"/>
+    <path d="M118 92 c2 -30 22 -42 32 -42 c18 0 34 12 34 40 c-12 -16 -32 -20 -48 -14 c-8 4 -14 10 -18 16z" fill="#F6CF6A"/>
+    <circle cx="138" cy="98" r="4.5" fill="#3A2E4F"/><circle cx="162" cy="98" r="4.5" fill="#3A2E4F"/>
+    <circle cx="139.5" cy="96.5" r="1.5" fill="#fff"/><circle cx="163.5" cy="96.5" r="1.5" fill="#fff"/>
+    <ellipse cx="130" cy="110" rx="7" ry="4" fill="#F7A9C6" opacity=".7"/><ellipse cx="170" cy="110" rx="7" ry="4" fill="#F7A9C6" opacity=".7"/>
+    <path d="M141 116 q9 8 18 0" stroke="#D9487F" stroke-width="3" fill="none" stroke-linecap="round"/>
+    ${has('crown') ? '<path class="pop" d="M126 60 l8 -20 l10 14 l6 -18 l6 18 l10 -14 l8 20z" fill="#F2B33D" stroke="#C98A12" stroke-width="2"/><circle cx="150" cy="44" r="3" fill="#E5579A"/>' : ''}
+    ${has('earrings') ? '<g class="pop"><circle cx="119" cy="108" r="4" fill="#9FE3FF"/><circle cx="181" cy="108" r="4" fill="#9FE3FF"/></g>' : ''}
+    ${has('necklace') ? '<g class="pop"><path d="M132 150 q18 16 36 0" stroke="#fff" stroke-width="3" fill="none"/><circle cx="150" cy="159" r="5" fill="#E5579A" stroke="#fff" stroke-width="2"/></g>' : ''}
+    ${has('wand') ? '<g class="pop"><line x1="200" y1="228" x2="226" y2="182" stroke="#B79CF0" stroke-width="4" stroke-linecap="round"/><path d="M226 170 l4 9 l10 1 l-8 6 l3 10 l-9 -6 l-9 6 l3 -10 l-8 -6 l10 -1z" fill="#F2B33D"/></g>' : ''}
+    ${has('bag') ? '<g class="pop"><rect x="86" y="226" width="26" height="20" rx="5" fill="#E5579A"/><path d="M92 226 q7 -10 14 0" stroke="#E5579A" stroke-width="3" fill="none"/></g>' : ''}
+  </g>
+  ${has('shoes') ? '<g class="pop"><ellipse cx="132" cy="314" rx="13" ry="6" fill="#BDEBFF" stroke="#7CC6E8" stroke-width="2"/><ellipse cx="168" cy="314" rx="13" ry="6" fill="#BDEBFF" stroke="#7CC6E8" stroke-width="2"/></g>' : ''}
+  ${has('puppy') ? '<g transform="translate(222 268)"><g class="pop"><ellipse cx="20" cy="26" rx="22" ry="16" fill="#F5E6D3"/><circle cx="20" cy="6" r="14" fill="#F5E6D3"/><ellipse cx="8" cy="2" rx="5" ry="9" fill="#C9A27E"/><ellipse cx="32" cy="2" rx="5" ry="9" fill="#C9A27E"/><circle cx="15" cy="6" r="2" fill="#3A2E4F"/><circle cx="25" cy="6" r="2" fill="#3A2E4F"/><circle cx="20" cy="11" r="2.5" fill="#3A2E4F"/></g></g>' : ''}`;
+}
+function renderDoll() {
+  const n = unlocked();
+  $('doll').innerHTML = dollSVG(n);
+  $('items').innerHTML = ITEMS.map((it, i) => `<span class="${i < n ? 'on' : ''}">${i < n ? it[1] : '🔒 ' + it[1].split(' ').slice(1).join(' ')}</span>`).join('');
+  $('progress').innerHTML = WORDS.map(x => { const s = ST.stat[x.w]; return `<span class="${s.mastered ? 'm' : s.streak ? 'half' : ''}">${x.w} ${s.mastered ? '✅' : s.streak ? '⭐' : ''}</span>`; }).join('');
+}
+$('startDoll').innerHTML = dollSVG(0);
+
+/* ---------- rounds ---------- */
+let lastW = null, forceW = null;
+function nextWord() {
+  if (forceW) { const f = WORDS.find(x => x.w === forceW); forceW = null; return f; }
+  const pool = WORDS.filter(x => !ST.stat[x.w].mastered && x.w !== lastW);
+  const use = pool.length ? pool : WORDS.filter(x => !ST.stat[x.w].mastered);
+  if (!use.length) return null;
+  const low = Math.min(...use.map(x => ST.stat[x.w].streak));
+  return pick(use.filter(x => ST.stat[x.w].streak === low));
+}
+function round() {
+  renderDoll();
+  if (unlocked() === WORDS.length) return finish();
+  const v = nextWord(); lastW = v.w;
+  const others = shuffle(WORDS.filter(x => x.w !== v.w)).slice(0, 3);
+  const meaning = Math.random() < .5;
+  const q = meaning
+    ? {type: '选意思', text: `<div class="word">${v.w}</div><div class="sent">${v.s}</div><div class="hintline">Say what it means first… then choose! 先说意思，再选</div>`, ans: v.m, opts: shuffle([v.m].concat(others.map(x => x.m)))}
+    : {type: '填空', text: `<div class="sent">${v.b}</div><div class="hintline">Which word fits? 哪个词放进去最合适？</div>`, ans: v.w, opts: shuffle([v.w].concat(others.map(x => x.w)))};
+  $('round').innerHTML = `<span class="tag">${meaning ? '👑 What does it mean?' : '🎀 Fill the gap'}</span>${q.text}<div class="opts" id="opts"></div><div class="msg" id="msg"></div><div id="after"></div>`;
+  let tries = 0;
+  q.opts.forEach(o => {
+    const b = document.createElement('button'); b.textContent = o;
+    b.onclick = () => {
+      if (b.classList.contains('wrong') || $('opts').dataset.done) return;
+      tries++;
+      const ok = o === q.ans, s = ST.stat[v.w];
+      ST.log.push({t: new Date().toISOString(), w: v.w, type: q.type, chosen: o, correct: ok, attempt: tries});
+      if (s.firstTry === null) s.firstTry = ok;
+      if (ok) {
+        $('opts').dataset.done = '1'; b.classList.add('right');
+        if (tries === 1) { s.right++; s.streak++; } else { s.streak = 0; }
+        const newly = !s.mastered && s.streak >= 2;
+        if (newly) s.mastered = true;
+        save();
+        const n = unlocked();
+        $('msg').innerHTML = newly ? `✨ You mastered “${v.w}”! ${who()} gets: <b>${ITEMS[n - 1][1]}</b>` : tries === 1 ? 'Yes! Lovely! 💖' : 'Now you’ve got it! We will practice this one again.';
+        $('msg').className = 'msg good';
+        $('after').innerHTML = `<div class="family">💡 ${v.fam}</div><button class="big next" id="nextBtn">${n === WORDS.length ? 'Go to the ball! 👑' : 'Next word →'}</button>`;
+        $('nextBtn').onclick = round;
+      } else {
+        b.classList.add('wrong'); s.wrong++; s.streak = 0; forceW = v.w; save();
+        $('msg').innerHTML = `Not this one. Read the sentence again! <span style="color:#8E7393">提示：${v.w} = ${v.m}</span>`; $('msg').className = 'msg bad';
+      }
+      renderDoll();
+    };
+    $('opts').appendChild(b);
+  });
+}
+function finish() {
+  $('game').hidden = true; $('end').hidden = false;
+  $('end').innerHTML = `<h1>${esc(Who())} goes to the ball!</h1><div class="sub">9 个词全部掌握，公主盛装出发啦！</div>
+    <svg viewBox="0 0 300 330" width="260">${dollSVG(9, true)}</svg>
+    <p style="font-size:19px;line-height:1.6;max-width:560px;margin:6px auto">The castle is <b>full</b> of music. Nobody is <b>suffering</b> tonight, and nobody plays a <b>trick</b>. ${esc(Who())} <b>decided</b> to dance all night — in a crown that <b>was fashioned by</b> a fairy! 💖</p>
+    <button class="big" id="again">Play again (practice) ↻</button><div><button class="tlink" data-tlog>老师记录</button></div>`;
+  $('again').onclick = () => { WORDS.forEach(x => { ST.stat[x.w].streak = 0; ST.stat[x.w].mastered = false; }); save(); $('end').hidden = true; $('game').hidden = false; round(); };
+  $('end').querySelector('[data-tlog]').onclick = openLog;
+}
+
+/* ---------- start ---------- */
+$('nameIn').value = ST.name;
+$('go').onclick = () => { ST.name = $('nameIn').value.trim(); save(); $('start').hidden = true; if (unlocked() === WORDS.length) { finish(); } else { $('game').hidden = false; round(); } };
+
+/* ---------- teacher log ---------- */
+function fmt(iso) { const d = new Date(iso); return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
+function textLog() {
+  const L = ['公主单词城堡 · 老师记录（导出 ' + fmt(new Date().toISOString()) + '）', '第一次见到这个词就答对 = “第一次”；连续答对 2 次 = 掌握', ''];
+  WORDS.forEach(x => { const s = ST.stat[x.w]; L.push(`${x.w}：${s.mastered ? '✅ 掌握' : '练习中'}｜第一次 ${s.firstTry === null ? '—' : s.firstTry ? '对' : '错'}｜对 ${s.right} 次｜错 ${s.wrong} 次`); });
+  L.push('', `掌握 ${unlocked()} / ${WORDS.length}；一共作答 ${ST.log.length} 次`);
+  const wrongs = ST.log.filter(e => !e.correct);
+  if (wrongs.length) { L.push('', '答错记录（词｜题型｜她选的）：'); wrongs.forEach(e => L.push(`  ${fmt(e.t)} ${e.w}｜${e.type}｜${e.chosen}`)); }
+  return L.join('\n');
+}
+function openLog() {
+  $('tbody').innerHTML = '<p style="font-size:14px;color:#8E7393">“第一次”= 第一次见到这个词就选对（最能反映课前是否已经认识）。</p><table><tr><th>词</th><th>状态</th><th>第一次</th><th>对</th><th>错</th></tr>' +
+    WORDS.map(x => { const s = ST.stat[x.w]; return `<tr><td>${x.w}</td><td>${s.mastered ? '✅ 掌握' : '练习中'}</td><td>${s.firstTry === null ? '—' : s.firstTry ? '对' : '错'}</td><td>${s.right}</td><td>${s.wrong}</td></tr>`; }).join('') + `</table><p>掌握 <b>${unlocked()} / ${WORDS.length}</b>；一共作答 ${ST.log.length} 次</p>`;
+  $('tmsg').textContent = ''; $('tmodal').hidden = false;
+}
+document.querySelectorAll('[data-tlog]').forEach(b => b.onclick = openLog);
+$('tclose').onclick = () => $('tmodal').hidden = true;
+$('tcopy').onclick = async () => { try { await navigator.clipboard.writeText(textLog()); $('tmsg').textContent = '已复制。'; } catch (e) { $('tmsg').textContent = '复制不了，请用下载。'; } };
+$('tdl').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([textLog()], {type: 'text/plain;charset=utf-8'})); a.download = '公主单词城堡_老师记录.txt'; a.click(); };
+$('treset').onclick = () => { if (confirm('清空所有进度和记录？')) { try { localStorage.removeItem(SKEY); } catch (e) {} location.reload(); } };
+</script>
+</body>
+</html>
